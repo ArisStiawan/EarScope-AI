@@ -1,0 +1,16 @@
+# Laravel ignore
+web/vendor/
+web/node_modules/
+web/public/storage
+web/.env
+
+# Python ignore
+earscope-model/__pycache__/
+earscope-model/*.pyc
+earscope-model/venv/
+earscope-model/.venv/
+earscope-model/env/
+
+# OS ignore
+.DS_Store
+Thumbs.db

@@ -1,0 +1,8 @@
+venv/
+videos/
+__pycache__/
+
+.env
+
+# Backups
+model-earscope/*_backup_*

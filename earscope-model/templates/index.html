@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Earscope — Pemeriksaan Telinga</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+    <!-- Font Awesome -->
+    <script src="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/js/all.min.js"></script>
+
+    <!-- Service Worker untuk PWA -->
+    <script>
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker
+          .register("/static/service-worker.js")
+          .then((reg) => console.log("Service Worker registered!", reg))
+          .catch((err) =>
+            console.log("Service Worker registration failed!", err)
+          );
+      }
+    </script>
+
+    <!-- Manifest dan CSS -->
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  </head>
+  <body>
+    <div class="camera-container" id="cameraFrame">
+      <!-- Video stream -->
+      <img id="video" />
+
+      <!-- Loading Overlay -->
+      <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-content">
+          <div class="spinner"></div>
+          <p>Membuka kamera...</p>
+        </div>
+      </div>
+
+      <!-- Flash Effect (saat capture foto) -->
+      <div id="flashOverlay" class="flash-overlay"></div>
+
+      <!-- Timer -->
+      <div id="timer" class="timer-badge">
+        <i class="fas fa-circle recording-dot"></i>
+        <span id="timerText">00:00</span>
+      </div>
+
+      <!-- Pesan No Internet -->
+      <div id="noInternet" class="no-internet-badge">
+        <i class="fas fa-wifi-slash"></i>
+        Tidak ada koneksi internet
+      </div>
+
+      <!-- Capture Success Toast -->
+      <div id="captureToast" class="capture-toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="captureToastText">Foto berhasil diambil!</span>
+      </div>
+
+      <!-- Info Badge — Pojok Kanan Bawah -->
+      <div class="info-badge" id="infoBadge">
+        <div class="info-row">
+          <span class="info-label">ID Konsultasi</span>
+          <span class="info-value" id="displayConsultationId">{{ consultation_id or '—' }}</span>
+        </div>
+        <div class="info-divider"></div>
+        <div class="info-row">
+          <span class="info-label">Pasien</span>
+          <span class="info-value" id="displayPatientName">{{ patient_name or '—' }}</span>
+        </div>
+      </div>
+
+      <!-- Kontrol Start, Stop & Capture -->
+      <div class="controls">
+        <button class="btn btn-start" id="startBtn">
+          <i class="fas fa-video"></i> Mulai Rekam
+        </button>
+
+        <button class="btn btn-capture" id="captureBtn" disabled>
+          <i class="fas fa-camera"></i> Ambil Foto
+        </button>
+
+        <button class="btn btn-stop" id="stopBtn" disabled>
+          <i class="fas fa-stop"></i> Berhenti
+        </button>
+      </div>
+    </div>
+
+    <!-- Script utama -->
+    <script>
+      const video = document.getElementById("video");
+      const startBtn = document.getElementById("startBtn");
+      const stopBtn = document.getElementById("stopBtn");
+      const captureBtn = document.getElementById("captureBtn");
+      const noInternet = document.getElementById("noInternet");
+      const timer = document.getElementById("timer");
+      const timerText = document.getElementById("timerText");
+      const loadingOverlay = document.getElementById("loadingOverlay");
+      const flashOverlay = document.getElementById("flashOverlay");
+      const captureToast = document.getElementById("captureToast");
+      const captureToastText = document.getElementById("captureToastText");
+
+      // Ambil consultation_id & patient_name dari URL parameter (dikirim oleh Laravel iframe)
+      const urlParams = new URLSearchParams(window.location.search);
+      const consultationId = urlParams.get('consultation_id') || '';
+      const patientName = urlParams.get('patient_name') || '';
+
+      // Update tampilan info badge
+      if (consultationId) {
+        document.getElementById('displayConsultationId').textContent = '#' + consultationId;
+      }
+      if (patientName) {
+        document.getElementById('displayPatientName').textContent = decodeURIComponent(patientName);
+      }
+
+      let streamStarted = false;
+      let timerInterval;
+      let seconds = 0;
+      let isCapturing = false;
+
+      function formatTime(sec) {
+        const minutes = Math.floor(sec / 60);
+        const s = sec % 60;
+        return `${minutes.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+      }
+
+      function startTimer() {
+        timer.classList.add("visible");
+        timerText.innerText = "00:00";
+        seconds = 0;
+
+        timerInterval = setInterval(() => {
+          seconds++;
+          timerText.innerText = formatTime(seconds);
+
+          if (seconds >= 20) {
+            autoStop();
+          }
+        }, 1000);
+      }
+
+      function stopTimer() {
+        clearInterval(timerInterval);
+        timerText.innerText = "00:00";
+        timer.classList.remove("visible");
+      }
+
+      function showCaptureToast(message, isError = false) {
+        captureToastText.textContent = message;
+        captureToast.className = 'capture-toast visible' + (isError ? ' error' : '');
+        setTimeout(() => {
+          captureToast.classList.remove("visible");
+        }, 3000);
+      }
+
+      function triggerFlash() {
+        flashOverlay.classList.add("flash");
+        setTimeout(() => {
+          flashOverlay.classList.remove("flash");
+        }, 300);
+      }
+
+      async function autoStop() {
+        stopTimer();
+        await fetch("/stop_recording", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ consultation_id: consultationId }),
+        });
+
+        stopBtn.disabled = true;
+        captureBtn.disabled = true;
+        startBtn.disabled = false;
+        streamStarted = false;
+
+        setTimeout(() => location.reload(), 500);
+      }
+
+      async function checkInternet() {
+        try {
+          const response = await fetch("/health", { method: "GET" });
+          const connected = response.ok;
+
+          noInternet.classList.toggle("visible", !connected);
+
+          if (connected && streamStarted && !timer.classList.contains("visible")) {
+            startTimer();
+          }
+        } catch (e) {
+          noInternet.classList.add("visible");
+          stopTimer();
+        }
+      }
+
+      setInterval(checkInternet, 5000);
+
+      // === START ===
+      startBtn.addEventListener("click", () => {
+        if (!consultationId) {
+          alert("ID Konsultasi tidak ditemukan. Silakan buka halaman ini dari menu Diagnosis di website.");
+          return;
+        }
+
+        if (!streamStarted) {
+          loadingOverlay.classList.add("visible");
+
+          video.src = "/process_video?consultation_id=" + encodeURIComponent(consultationId);
+          streamStarted = true;
+
+          startBtn.disabled = true;
+          stopBtn.disabled = false;
+          captureBtn.disabled = false;
+
+          video.onload = () => {
+            loadingOverlay.classList.remove("visible");
+          };
+        }
+      });
+
+      // === STOP ===
+      stopBtn.addEventListener("click", async () => {
+        stopTimer();
+
+        await fetch("/stop_recording", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ consultation_id: consultationId }),
+        });
+
+        stopBtn.disabled = true;
+        captureBtn.disabled = true;
+        startBtn.disabled = false;
+        streamStarted = false;
+
+        setTimeout(() => location.reload(), 500);
+      });
+
+      // === CAPTURE FOTO ===
+      captureBtn.addEventListener("click", async () => {
+        if (isCapturing) return;
+        isCapturing = true;
+        captureBtn.disabled = true;
+        captureBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+
+        try {
+          triggerFlash();
+
+          const response = await fetch("/capture_photo", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ consultation_id: consultationId }),
+          });
+
+          const data = await response.json();
+
+          if (data.status === 'success') {
+            showCaptureToast("Foto berhasil diambil & dikirim!");
+          } else if (data.status === 'warning') {
+            showCaptureToast(data.message, true);
+          } else {
+            showCaptureToast(data.message || "Gagal mengambil foto.", true);
+          }
+        } catch (err) {
+          showCaptureToast("Gagal mengambil foto: " + err.message, true);
+        } finally {
+          isCapturing = false;
+          if (streamStarted) {
+            captureBtn.disabled = false;
+          }
+          captureBtn.innerHTML = '<i class="fas fa-camera"></i> Ambil Foto';
+        }
+      });
+    </script>
+  </body>
+</html>
