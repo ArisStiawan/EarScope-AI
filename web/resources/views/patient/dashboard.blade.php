@@ -63,7 +63,7 @@
                 </div>
             </div>
 
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="bg-white overflow-hidden shadow-lg border sm:rounded-lg">
                 <div class="p-6 text-gray-900">
 
                     {{-- Header tabel --}}
@@ -203,7 +203,7 @@
 
     <!-- Consultation Detail Modal -->
     <div id="consultationDetailModal" class="hidden fixed z-10 inset-0 overflow-y-auto">
-        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+        <div class="flex items-center justify-center min-h-screen px-4 mt-20 pb-20 text-center sm:block sm:p-0">
             <!-- Background overlay -->
             <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
 

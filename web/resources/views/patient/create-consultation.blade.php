@@ -30,7 +30,7 @@
                 </div>
             @endif
 
-            <div class="bg-white overflow-hidden border border-slate-100 shadow-sm rounded-2xl">
+            <div class="bg-white overflow-hidden border border-slate-100 shadow-lg rounded-2xl">
                 <div class="p-8">
 
                     {{-- Form Header --}}

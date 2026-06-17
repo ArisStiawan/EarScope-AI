@@ -14,7 +14,7 @@
     $dashboardRoute = route($dashboardRouteName);
 @endphp
 
-<nav x-data="{ open: false }" class="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-teal-100/60 shadow-sm transition-all duration-300">
+<nav x-data="{ open: false }" class="bg-gradient-to-r from-teal-600 to-emerald-600 backdrop-blur-md sticky top-0 z-50 border-b border-teal-100/60 shadow-sm transition-all duration-300">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
@@ -22,39 +22,39 @@
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
                     <a href="{{ $dashboardRoute }}" class="flex items-center gap-2.5 group">
-                        <x-application-logo class="h-9 w-9 text-teal-600 animate-heartbeat" />
-                        <span class="text-lg font-bold bg-gradient-to-r from-teal-600 to-emerald-600 bg-clip-text text-transparent group-hover:from-teal-700 group-hover:to-emerald-700 transition duration-300">EarScope</span>
+                        <x-application-logo class="h-9 w-9 text-white animate-heartbeat" />
+                        <span class="text-lg font-bold text-white group-hover:text-teal-100 transition duration-300">EarScope</span>
                     </a>
                 </div>
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-10 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="$dashboardRoute" :active="request()->routeIs($dashboardRouteName)">
+                    <x-nav-link :href="$dashboardRoute" :active="request()->routeIs($dashboardRouteName)" class="!text-white">
                         {{ __('Dashboard') }}
                     </x-nav-link>
 
                     @if($role === 'doctor')
-                        <x-nav-link href="/doctor/consultations" :active="request()->is('doctor/consultations*')">
+                        <x-nav-link href="/doctor/consultations" :active="request()->is('doctor/consultations*')" class="!text-white">
                             {{ __('Consultation Request') }}
                         </x-nav-link>
-                        <x-nav-link href="/doctor/diagnoses" :active="request()->is('doctor/diagnoses*')">
+                        <x-nav-link href="/doctor/diagnoses" :active="request()->is('doctor/diagnoses*')" class="!text-white">
                             {{ __('Diagnoses') }}
                         </x-nav-link>
-                        <x-nav-link href="/doctor/patients-profile" :active="request()->is('doctor/patients-profile*')">
+                        <x-nav-link href="/doctor/patients-profile" :active="request()->is('doctor/patients-profile*')" class="!text-white">
                             {{ __('Patients Profile') }}
                         </x-nav-link>
                     @elseif($role === 'patient')
-                        <x-nav-link href="/patient/create-consultation" :active="request()->is('patient/create-consultation*')">
+                        <x-nav-link href="/patient/create-consultation" :active="request()->is('patient/create-consultation*')" class="!text-white">
                             {{ __('Consultation Request') }}
                         </x-nav-link>
-                        <x-nav-link href="/patient/consultation-results" :active="request()->is('patient/consultation-results*')">
+                        <x-nav-link href="/patient/consultation-results" :active="request()->is('patient/consultation-results*')" class="!text-white">
                             {{ __('Consultation Results') }}
                         </x-nav-link>
                     @elseif($role === 'admin')
-                        <x-nav-link href="/admin/doctors" :active="request()->is('admin/doctors*')">
+                        <x-nav-link href="/admin/doctors" :active="request()->is('admin/doctors*')" class="!text-white">
                              {{ __('Doctor Management') }}
                         </x-nav-link>
-                        <x-nav-link href="/admin/patients" :active="request()->is('admin/patients*')">
+                        <x-nav-link href="/admin/patients" :active="request()->is('admin/patients*')" class="!text-white">
                              {{ __('Patient Data') }}
                         </x-nav-link>
                     @endif
@@ -65,7 +65,7 @@
             <div class="hidden sm:flex sm:items-center sm:ms-6">
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
-                        <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-slate-500 hover:text-teal-600 focus:outline-none transition ease-in-out duration-150">
+                        <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white hover:text-teal-100 focus:outline-none transition ease-in-out duration-150">
                             <div>{{ Auth::user()->username }}</div>
 
                             <div class="ms-1">
@@ -97,7 +97,7 @@
 
             <!-- Hamburger -->
             <div class="-me-2 flex items-center sm:hidden">
-                <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out">
+                <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-white hover:text-white hover:bg-white/20 focus:outline-none transition duration-150 ease-in-out">
                     <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                         <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                         <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -108,48 +108,48 @@
     </div>
 
     <!-- Responsive Navigation Menu -->
-    <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
+    <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden bg-teal-700/50">
         <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="$dashboardRoute" :active="request()->routeIs($dashboardRouteName)">
+            <x-responsive-nav-link :href="$dashboardRoute" :active="request()->routeIs($dashboardRouteName)" class="!text-white">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
 
             @if($role === 'doctor')
-                <x-responsive-nav-link href="/doctor/consultations" :active="request()->is('doctor/consultations*')">
+                <x-responsive-nav-link href="/doctor/consultations" :active="request()->is('doctor/consultations*')" class="!text-white">
                     {{ __('Consultation Request') }}
                 </x-responsive-nav-link>
-                <x-responsive-nav-link href="/doctor/diagnoses" :active="request()->is('doctor/diagnoses*')">
+                <x-responsive-nav-link href="/doctor/diagnoses" :active="request()->is('doctor/diagnoses*')" class="!text-white">
                     {{ __('Hasil Pemeriksaan') }}
                 </x-responsive-nav-link>
-                <x-responsive-nav-link href="/doctor/patients-profile" :active="request()->is('doctor/patients-profile*')">
+                <x-responsive-nav-link href="/doctor/patients-profile" :active="request()->is('doctor/patients-profile*')" class="!text-white">
                     {{ __('Patients Profile') }}
                 </x-responsive-nav-link>
             @elseif($role === 'patient')
-                <x-responsive-nav-link href="/patient/create-consultation" :active="request()->is('patient/create-consultation*')">
+                <x-responsive-nav-link href="/patient/create-consultation" :active="request()->is('patient/create-consultation*')" class="!text-white">
                     {{ __('Consultation Request') }}
                 </x-responsive-nav-link>
-                <x-responsive-nav-link href="/patient/diagnoses" :active="request()->is('patient/diagnoses*')">
+                <x-responsive-nav-link href="/patient/diagnoses" :active="request()->is('patient/diagnoses*')" class="!text-white">
                     {{ __('Hasil Pemeriksaan') }}
                 </x-responsive-nav-link>
             @elseif($role === 'admin')
-                <x-responsive-nav-link href="/admin/doctors" :active="request()->is('admin/doctors*')">
+                <x-responsive-nav-link href="/admin/doctors" :active="request()->is('admin/doctors*')" class="!text-white">
                     {{ __('Doctor Management') }}
                 </x-responsive-nav-link>
-                <x-responsive-nav-link href="/admin/patients" :active="request()->is('admin/patients*')">
+                <x-responsive-nav-link href="/admin/patients" :active="request()->is('admin/patients*')" class="!text-white">
                     {{ __('Patient Data') }}
                 </x-responsive-nav-link>
             @endif
         </div>
 
         <!-- Responsive Settings Options -->
-        <div class="pt-4 pb-1 border-t border-gray-200">
+        <div class="pt-4 pb-1 border-t border-white/20">
             <div class="px-4">
-                <div class="font-medium text-base text-gray-800">{{ Auth::user()->username }}</div>
-                <div class="font-medium text-sm text-gray-500 capitalize">{{ Auth::user()->role }}</div>
+                <div class="font-medium text-base text-white">{{ Auth::user()->username }}</div>
+                <div class="font-medium text-sm text-white/70 capitalize">{{ Auth::user()->role }}</div>
             </div>
 
             <div class="mt-3 space-y-1">
-                <x-responsive-nav-link :href="route('profile.edit')">
+                <x-responsive-nav-link :href="route('profile.edit')" class="!text-white">
                     {{ __('Profile') }}
                 </x-responsive-nav-link>
 
@@ -157,7 +157,7 @@
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
 
-                    <x-responsive-nav-link :href="route('logout')"
+                    <x-responsive-nav-link :href="route('logout')" class="!text-white"
                             onclick="event.preventDefault();
                                         this.closest('form').submit();">
                         {{ __('Log Out') }}
