@@ -14,14 +14,6 @@ import queue
 import socket
 import time
 import numpy as np
-import platform
-
-IS_WINDOWS = platform.system() == 'Windows'
-
-def get_video_capture(idx):
-    if IS_WINDOWS:
-        return cv2.VideoCapture(idx, cv2.CAP_DSHOW)
-    return cv2.VideoCapture(idx)
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, 
@@ -142,109 +134,6 @@ class Detection:
 
 detection = Detection()
 
-class CameraManager:
-    def __init__(self):
-        self.cap = None
-        self.camera_idx = -1
-        self.lock = threading.Lock()
-        self.is_recording = False
-        self.recorded_frames = []
-        self.consultation_id = ""
-        self.width = 1280
-        self.height = 720
-
-    def set_camera(self, idx):
-        with self.lock:
-            if self.camera_idx == idx and self.cap is not None and self.cap.isOpened():
-                return True
-            
-            # Close old camera if open
-            if self.cap is not None:
-                logger.info(f"Releasing camera {self.camera_idx} to switch to {idx}")
-                self.cap.release()
-                self.cap = None
-                
-            logger.info(f"Opening camera index {idx}...")
-            self.cap = get_video_capture(idx)
-            if not self.cap.isOpened():
-                logger.error(f"Failed to open camera index {idx}")
-                self.camera_idx = -1
-                return False
-                
-            self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.width)
-            self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.height)
-            self.camera_idx = idx
-            return True
-
-    def get_frame(self):
-        with self.lock:
-            if self.cap is None or not self.cap.isOpened():
-                return None
-            ret, frame = self.cap.read()
-            if not ret:
-                return None
-            frame = cv2.resize(frame, (self.width, self.height))
-            
-            # If recording, append a copy of the frame
-            if self.is_recording:
-                self.recorded_frames.append(frame.copy())
-                
-            return frame
-
-    def start_recording(self, consultation_id):
-        with self.lock:
-            self.recorded_frames = []
-            self.consultation_id = consultation_id
-            self.is_recording = True
-            logger.info(f"Started recording frames for consultation_id={consultation_id}")
-
-    def stop_recording(self):
-        with self.lock:
-            if not self.is_recording:
-                return None, ""
-            self.is_recording = False
-            frames = list(self.recorded_frames)
-            self.recorded_frames = []
-            logger.info(f"Stopped recording. Total frames captured: {len(frames)}")
-            return frames, self.consultation_id
-
-camera_manager = CameraManager()
-
-def gen_frames(camera_idx):
-    global latest_frame
-    
-    # Try setting the camera
-    success = camera_manager.set_camera(camera_idx)
-    if not success:
-        # Fallback to auto-detect
-        for alt_idx in [0, 1, 2, 3]:
-            if alt_idx == camera_idx:
-                continue
-            if camera_manager.set_camera(alt_idx):
-                break
-                
-    while True:
-        frame = camera_manager.get_frame()
-        if frame is None:
-            # Yield error frame
-            err_frame = np.zeros((480, 640, 3), dtype=np.uint8)
-            cv2.putText(err_frame, "KAMERA TIDAK TERDETEKSI", (60, 220),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 255), 2)
-            _, buf = cv2.imencode('.jpg', err_frame)
-            yield (b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + buf.tobytes() + b'\r\n')
-            time.sleep(0.5)
-            continue
-            
-        with latest_frame_lock:
-            latest_frame = frame.copy()
-            
-        ret, buffer = cv2.imencode('.jpg', frame)
-        if not ret:
-            continue
-        yield (b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + buffer.tobytes() + b'\r\n')
-        # Limit frame rate slightly to avoid high CPU usage
-        time.sleep(0.04)
-
 # ============================================================
 # ROUTES
 # ============================================================
@@ -253,24 +142,6 @@ def gen_frames(camera_idx):
 def health():
     """Health check endpoint — Laravel memanggil ini untuk cek apakah Flask sudah running."""
     return jsonify({'status': 'ok', 'message': 'Flask earscope is running'}), 200
-
-
-@app.route('/get_cameras')
-def get_cameras():
-    """Detect available camera indices."""
-    available_cameras = []
-    # Test indices 0 to 5
-    for cam_idx in range(6):
-        cap = get_video_capture(cam_idx)
-        if cap.isOpened():
-            ret, _ = cap.read()
-            if ret:
-                available_cameras.append(cam_idx)
-            cap.release()
-    # Fallback to at least camera 0 if none detected
-    if not available_cameras:
-        available_cameras = [0]
-    return jsonify({'cameras': available_cameras})
 
 
 @app.route('/')
@@ -282,29 +153,44 @@ def index():
                            patient_name=patient_name)
 
 
-@app.route('/video_feed')
 @app.route('/process_video')
-def video_feed_route():
-    camera_id = request.args.get('camera_id', 0, type=int)
-    return Response(gen_frames(camera_id), mimetype='multipart/x-mixed-replace; boundary=frame')
+def process_video():
+    if not network_available:
+        logger.warning("Tidak bisa mulai recording: jaringan tidak tersedia")
+        return jsonify({'status': 'error', 'message': 'Tidak ada koneksi internet. Coba lagi nanti.'}), 503
+    global recording_data
 
-@app.route('/start_recording', methods=['POST'])
-def start_recording_route():
-    body = request.get_json(silent=True) or {}
-    consultation_id = body.get('consultation_id', '')
-    if not consultation_id:
-        return jsonify({'status': 'error', 'message': 'consultation_id is required.'}), 400
-        
-    camera_manager.start_recording(consultation_id)
-    return jsonify({'status': 'success', 'message': 'Recording started.'})
+    # Ambil consultation_id dari query string
+    consultation_id = request.args.get('consultation_id', '')
+    logger.info(f"[process_video] consultation_id={consultation_id}")
+
+    # Reset recording data
+    recording_data = {
+        "raw_path": None,
+        "bbox_path": None,
+        "diagnosis": None,
+        "consultation_id": consultation_id
+    }
+    stop_event.clear()
+    logger.info("Starting video processing and recording")
+    return Response(record_and_stream(consultation_id), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route('/stop_recording', methods=['POST'])
-def stop_recording_route():
-    frames, consultation_id = camera_manager.stop_recording()
-    if frames:
-        threading.Thread(target=process_recorded_video_async, args=(frames, consultation_id), daemon=True).start()
-        return jsonify({'status': 'stopping', 'message': 'Recording stopped, processing in background.'})
-    return jsonify({'status': 'error', 'message': 'No active recording or no frames captured.'}), 400
+def stop_recording():
+    if not network_available:
+        logger.warning("Tidak bisa stop recording: jaringan tidak tersedia")
+        return jsonify({'status': 'error', 'message': 'Tidak ada koneksi internet. Stop recording tidak tersedia.'}), 503
+
+    # Baca consultation_id dari JSON body (dikirim oleh browser)
+    body = request.get_json(silent=True) or {}
+    consultation_id = body.get('consultation_id', recording_data.get('consultation_id', ''))
+    recording_data['consultation_id'] = consultation_id
+    logger.info(f"[stop_recording] consultation_id={consultation_id}")
+
+    logger.info("Received request to stop recording")
+    stop_event.set()
+
+    return jsonify({'status': 'stopping', 'message': 'Recording stopped, processing data'})
 
 
 @app.route('/capture_photo', methods=['POST'])
@@ -322,7 +208,7 @@ def capture_photo():
         return jsonify({'status': 'error', 'message': 'Kamera belum aktif atau belum ada frame.'}), 400
 
     body = request.get_json(silent=True) or {}
-    consultation_id = body.get('consultation_id', camera_manager.consultation_id)
+    consultation_id = body.get('consultation_id', recording_data.get('consultation_id', ''))
 
     if not consultation_id:
         return jsonify({'status': 'error', 'message': 'consultation_id diperlukan.'}), 400
@@ -418,59 +304,130 @@ def api_sender_worker():
 # Jalankan worker thread sekali saat app mulai
 threading.Thread(target=api_sender_worker, daemon=True).start()
 
-def process_recorded_video_async(frames, consultation_id):
-    if not frames:
-        logger.error("No frames to process!")
+def record_and_stream(consultation_id=''):
+    global recording_data, latest_frame
+    logger.info(f"Starting recording and streaming process (consultation_id={consultation_id})")
+
+    # --- Auto-detect kamera: coba index 0, 1, 2 ---
+    cap = 0
+    for cam_idx in [0, 1, 2]:
+        logger.info(f"Mencoba kamera index {cam_idx}...")
+        test_cap = cv2.VideoCapture(cam_idx, cv2.CAP_DSHOW)
+        if test_cap.isOpened():
+            ret, _ = test_cap.read()
+            if ret:
+                cap = test_cap
+                logger.info(f"Kamera ditemukan di index {cam_idx}")
+                break
+        test_cap.release()
+
+    if cap is None or not cap.isOpened():
+        logger.error("Tidak ada kamera yang terdeteksi!")
+        # Kirim frame error agar browser tahu kamera gagal
+        err_frame = np.zeros((480, 640, 3), dtype=np.uint8)
+        cv2.putText(err_frame, "KAMERA TIDAK TERDETEKSI", (60, 220),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 255), 2)
+        cv2.putText(err_frame, "Pastikan kamera terhubung", (100, 270),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (200, 200, 200), 1)
+        _, buf = cv2.imencode('.jpg', err_frame)
+        for _ in range(30):  # tampilkan pesan selama ~1.5 detik
+            yield (b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + buf.tobytes() + b'\r\n')
         return
-        
+
+    width, height = 1280, 720
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     folder = f"videos/{timestamp}"
     os.makedirs(folder, exist_ok=True)
 
     raw_path = os.path.join(folder, f"raw_{timestamp}.webm")
     bbox_path = os.path.join(folder, f"bbox_{timestamp}.webm")
-    
-    width, height = camera_manager.width, camera_manager.height
-    fourcc = cv2.VideoWriter_fourcc(*'VP80')
-    
-    # Save raw video
-    logger.info(f"Saving raw video to {raw_path}")
+
+    fourcc = cv2.VideoWriter_fourcc(*'VP80')  # WebM VP8 - didukung semua browser
     raw_writer = cv2.VideoWriter(raw_path, fourcc, 20.0, (width, height))
-    for frame in frames:
-        raw_writer.write(frame)
-    raw_writer.release()
-    
-    # Run YOLO detection & Save processed video
-    logger.info(f"Running YOLO on {len(frames)} frames...")
-    bbox_writer = cv2.VideoWriter(bbox_path, fourcc, 20.0, (width, height))
-    detected_classes = []
-    
-    for i, frame in enumerate(frames):
-        resized_frame = cv2.resize(frame.copy(), (640, 640))
-        result_img, results = detection.predict_and_detect(resized_frame, conf=0.3)
-        result_img = cv2.resize(result_img, (width, height))
-        
-        for result in results:
-            for box in result.boxes:
-                class_id = int(box.cls[0])
-                detected_classes.append(class_id)
-                
-        bbox_writer.write(result_img)
-    bbox_writer.release()
-    
-    # Determine diagnosis
-    diagnosis_id = Counter(detected_classes).most_common(1)[0][0] if detected_classes else -1
-    diagnosis_label = labels.get(diagnosis_id, "Unknown")
-    
-    # Put in send queue to Laravel
-    record_data = {
-        "raw_path": raw_path,
-        "bbox_path": bbox_path,
-        "diagnosis": diagnosis_label,
-        "consultation_id": consultation_id
-    }
-    send_queue.put(record_data)
-    logger.info(f"Background processing done. Diagnosis: {diagnosis_label}. Enqueued for sending.")
+    if not raw_writer.isOpened():
+        logger.error("Gagal membuat VideoWriter! Coba fallback ke mp4v")
+        raw_path = os.path.join(folder, f"raw_{timestamp}.mp4")
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        raw_writer = cv2.VideoWriter(raw_path, fourcc, 20.0, (width, height))
+
+    frames = []
+
+    try:
+        while cap.isOpened() and not stop_event.is_set():
+            ret, frame = cap.read()
+            if not ret:
+                logger.warning("Failed to read frame from camera")
+                break
+
+            frame = cv2.resize(frame, (width, height))
+            raw_writer.write(frame)
+            frames.append(frame)
+
+            # Simpan frame terakhir untuk fitur capture foto
+            with latest_frame_lock:
+                latest_frame = frame.copy()
+
+            # Tampilkan frame mentah saja (tanpa bounding box)
+            ret, buffer = cv2.imencode('.jpg', frame)
+            frame_bytes = buffer.tobytes()
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
+
+    except Exception as e:
+        logger.error(f"Error during recording: {e}")
+    finally:
+        logger.info("Releasing video resources")
+        cap.release()
+        raw_writer.release()
+
+        # Reset latest_frame saat kamera berhenti
+        with latest_frame_lock:
+            latest_frame = None
+
+        # Proses deteksi setelah selesai merekam
+        logger.info(f"Processing detection on {len(frames)} recorded frames")
+
+        # Sesuaikan ekstensi bbox dengan raw (keduanya webm atau mp4)
+        raw_ext = os.path.splitext(raw_path)[1]
+        bbox_path = os.path.splitext(bbox_path)[0] + raw_ext
+
+        bbox_fourcc = cv2.VideoWriter_fourcc(*'VP80') if raw_ext == '.webm' else cv2.VideoWriter_fourcc(*'mp4v')
+        bbox_writer = cv2.VideoWriter(bbox_path, bbox_fourcc, 20.0, (width, height))
+        detected_classes = []
+
+        for i, frame in enumerate(frames):
+            resized_frame = cv2.resize(frame.copy(), (640, 640))  # input ke model
+            result_img, results = detection.predict_and_detect(resized_frame, conf=0.3)  # threshold lebih rendah
+
+            result_img = cv2.resize(result_img, (width, height))
+
+            for result in results:
+                for box in result.boxes:
+                    class_id = int(box.cls[0])
+                    conf_score = float(box.conf[0])
+                    detected_classes.append(class_id)
+                    logger.info(f"Frame {i}: detected class {class_id} ({labels.get(class_id, '?')}) conf={conf_score:.2f}")
+            bbox_writer.write(result_img)
+
+        bbox_writer.release()
+
+        logger.info(f"Total detections: {len(detected_classes)} from {len(frames)} frames")
+        logger.info(f"Class distribution: {Counter(detected_classes).most_common()}")
+
+        diagnosis_id = Counter(detected_classes).most_common(1)[0][0] if detected_classes else -1
+        diagnosis_label = labels.get(diagnosis_id, "Unknown")
+
+        record_data = {
+            "raw_path": raw_path,
+            "bbox_path": bbox_path,
+            "diagnosis": diagnosis_label,
+            "consultation_id": consultation_id or recording_data.get('consultation_id', '')
+        }
+        send_queue.put(record_data)
+        logger.info("Recording data enqueued for sending to API")
 
 def send_to_api(raw_path, bbox_path, diagnosis, consultation_id=''):
     """Send recorded videos and diagnosis to Laravel API"""
