@@ -60,7 +60,7 @@ class PatientController extends Controller
         ActivityLogger::logConsultationRequested($consultation, $patient);
 
         return redirect()->route('patient.dashboard')
-            ->with('success', 'Konsultasi berhasil dikirim! Menunggu konfirmasi dari dokter.');
+            ->with('success', 'Consultation request submitted successfully! Waiting for doctor confirmation.');
     }
 
     public function consultationResults()
@@ -79,11 +79,30 @@ class PatientController extends Controller
     public function getConsultationDetails($id)
     {
         $patient = auth()->user()->patient;
-        $consultation = ConsultationRequest::with('doctor.user')->findOrFail($id);
+        $consultation = ConsultationRequest::with(['doctor.user', 'diagnosis.images'])->findOrFail($id);
         
         // Authorize: only patient owner can view
         if ($consultation->patient_id !== $patient->id) {
             abort(403, 'Unauthorized');
+        }
+
+        $diagnosisData = null;
+        if ($consultation->diagnosis) {
+            $d = $consultation->diagnosis;
+            $diagnosisData = [
+                'result' => $d->diagnosis_result,
+                'notes' => $d->notes,
+                'is_verified' => $d->is_verified,
+                'raw_video_url' => $d->raw_video_path
+                    ? asset('storage/' . $d->raw_video_path) : null,
+                'processed_video_url' => $d->processed_video_path
+                    ? asset('storage/' . $d->processed_video_path) : null,
+                'images' => $d->images->map(fn($img) => [
+                    'id' => $img->id,
+                    'image_url' => asset('storage/' . $img->image_path),
+                    'ai_screening_result' => $img->ai_screening_result,
+                ]),
+            ];
         }
 
         return response()->json([
@@ -99,10 +118,7 @@ class PatientController extends Controller
                 'specialization' => $consultation->doctor->specialization ?? 'ENT Specialist',
                 'email' => $consultation->doctor->user->email ?? 'N/A'
             ] : null,
-            'diagnosis' => $consultation->diagnosis ? [
-                'result' => $consultation->diagnosis->diagnosis_result,
-                'notes' => $consultation->diagnosis->notes,
-            ] : null,
+            'diagnosis' => $diagnosisData,
         ]);
     }
 

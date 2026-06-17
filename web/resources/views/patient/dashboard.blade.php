@@ -8,8 +8,8 @@
                     </svg>
                 </div>
                 <div>
-                    <h2 class="font-bold text-2xl text-slate-800 leading-tight">{{ __('Dashboard Pasien') }}</h2>
-                    <p class="text-xs font-medium text-slate-400 mt-0.5">Kelola janji temu dan hasil pemeriksaan medis telinga Anda</p>
+                    <h2 class="font-bold text-2xl text-slate-800 leading-tight">{{ __('Patient Dashboard') }}</h2>
+                    <p class="text-xs font-medium text-slate-400 mt-0.5">Manage your appointments and ear examination results</p>
                 </div>
             </div>
             <div>
@@ -18,7 +18,7 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                     </svg>
-                    Ajukan Konsultasi Baru
+                    Request New Consultation
                 </a>
             </div>
         </div>
@@ -41,15 +41,15 @@
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div class="bg-white p-6 rounded-lg shadow">
-                    <h3 class="text-gray-500">Total Permintaan Konsultasi</h3>
+                    <h3 class="text-gray-500">Total Consultation Requests</h3>
                     <p class="mt-3 text-2xl font-bold">{{ $totalRequests }}</p>
                 </div>
                 <div class="bg-white p-6 rounded-lg shadow">
-                    <h3 class="text-gray-500">Total Konsultasi Selesai</h3>
+                    <h3 class="text-gray-500">Total Completed Consultations</h3>
                     <p class="mt-3 text-2xl font-bold">{{ $totalDone }}</p>
                 </div>
                 <div class="bg-white p-6 rounded-lg shadow">
-                    <h3 class="text-gray-500">Jadwal Konsultasi Terdekat</h3>
+                    <h3 class="text-gray-500">Next Scheduled Consultation</h3>
                     <p class="text-2xl font-bold">
                         @if ($nextScheduled)
                             {{ \Carbon\Carbon::parse($nextScheduled->scheduled_date)->format('d M Y') }}
@@ -70,7 +70,7 @@
                     <div class="flex justify-between items-center mb-6">
                         <div>
                             <h3 class="font-bold text-lg text-gray-800">{{ __('Upcoming Consultations') }}</h3>
-                            <p class="text-sm text-gray-500 mt-0.5">Jadwal konsultasi yang akan datang</p>
+                            <p class="text-sm text-gray-500 mt-0.5">Your upcoming scheduled consultations</p>
                         </div>
                         <!-- <a href="{{ route('patient.create-consultation') }}"
                             class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition shadow-sm">
@@ -89,10 +89,10 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
-                            <p class="mt-3 text-sm text-gray-500">Tidak ada konsultasi yang akan datang.</p>
+                            <p class="mt-3 text-sm text-gray-500">No upcoming consultations found.</p>
                             <a href="{{ route('patient.create-consultation') }}"
                                 class="mt-4 inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold py-2 px-4 rounded-lg transition">
-                                Ajukan Konsultasi Sekarang
+                                Request Consultation Now
                             </a>
                         </div>
                     @else
@@ -105,13 +105,13 @@
                                             No</th>
                                         <th
                                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Dokter</th>
+                                            Doctor</th>
                                         <th
                                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Keluhan</th>
+                                            Complaint</th>
                                         <th
                                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Jadwal</th>
+                                            Schedule</th>
                                         <th
                                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Status</th>
@@ -149,8 +149,8 @@
                                                     <div class="text-xs text-gray-400">
                                                         {{ $consultation->scheduled_time ?? '' }}</div>
                                                 @else
-                                                    <span class="text-xs text-yellow-600 italic">Menunggu
-                                                        persetujuan</span>
+                                                    <span class="text-xs text-yellow-600 italic">Waiting for
+                                                        approval</span>
                                                 @endif
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
@@ -169,7 +169,7 @@
                                                             'class' => 'bg-red-100 text-red-800',
                                                         ],
                                                         'done' => [
-                                                            'label' => 'Selesai',
+                                                            'label' => 'Done',
                                                             'class' => 'bg-blue-100 text-blue-800',
                                                         ],
                                                     ];

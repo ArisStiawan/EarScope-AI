@@ -12,7 +12,7 @@
                         <h3 class="text-lg leading-6 font-medium text-gray-900" id="scheduleModalTitle">
                             Approve &amp; Schedule Consultation
                         </h3>
-                        <p class="text-sm text-gray-500 mt-0.5" id="scheduleModalSubtitle">Tentukan jadwal konsultasi untuk pasien ini</p>
+                        <p class="text-sm text-gray-500 mt-0.5" id="scheduleModalSubtitle">Set the consultation schedule for this patient</p>
                     </div>
                     <button type="button" onclick="closeScheduleModal()" class="text-gray-400 hover:text-gray-500 ml-4">
                         <span class="sr-only">Close</span>
@@ -78,8 +78,8 @@
             $('#scheduleSubmitLabel').text('Approve & Schedule');
             $('#scheduleSubmitBtn').removeClass('bg-indigo-600 hover:bg-indigo-700').addClass('bg-green-600 hover:bg-green-700');
         } else {
-            $('#scheduleModalTitle').text('Ubah Jadwal Konsultasi');
-            $('#scheduleSubmitLabel').text('Simpan Jadwal');
+            $('#scheduleModalTitle').text('Reschedule Consultation');
+            $('#scheduleSubmitLabel').text('Save Schedule');
             $('#scheduleSubmitBtn').removeClass('bg-green-600 hover:bg-green-700').addClass('bg-indigo-600 hover:bg-indigo-700');
         }
 
@@ -104,7 +104,7 @@
         }
 
         $('#scheduleSubmitBtn').prop('disabled', true);
-        $('#scheduleSubmitLabel').text('Menyimpan...');
+        $('#scheduleSubmitLabel').text('Saving...');
 
         $.ajax({
             url: '/doctor/consultation/' + consultationId + '/schedule',
@@ -115,7 +115,7 @@
                 scheduled_time: scheduledTime
             },
             success: function(response) {
-                showScheduleSuccess('Konsultasi berhasil dijadwalkan!');
+                showScheduleSuccess('Consultation scheduled successfully!');
 
                 // Update status badge
                 let statusBadge = $('#status-' + consultationId);
@@ -125,7 +125,7 @@
                 // Update scheduled date cell
                 let row = $('#row-' + consultationId);
                 let schedCell = row.find('td').eq(4); // column index 4 = Scheduled
-                let dateFormatted = new Date(scheduledDate).toLocaleDateString('id-ID', {day:'2-digit', month:'short', year:'numeric'});
+                let dateFormatted = new Date(scheduledDate).toLocaleDateString('en-US', {day:'2-digit', month:'short', year:'numeric'});
                 schedCell.html('<span class="font-medium text-gray-800">' + dateFormatted + '</span><br><span class="text-xs text-gray-400">' + scheduledTime + '</span>');
 
                 // Replace action buttons: remove Approve/Reject, keep View + Schedule
@@ -137,7 +137,7 @@
                 }, 1800);
             },
             error: function(xhr) {
-                let errorMessage = 'Terjadi kesalahan';
+                let errorMessage = 'An error occurred';
                 if (xhr.responseJSON && xhr.responseJSON.error) {
                     errorMessage = xhr.responseJSON.error;
                 } else if (xhr.responseJSON && xhr.responseJSON.errors) {

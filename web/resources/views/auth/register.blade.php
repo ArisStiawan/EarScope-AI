@@ -41,8 +41,7 @@
                 </div>
                 <h1 class="text-2xl font-extrabold text-white tracking-tight mb-1 relative z-10">
                     {{ config('app.name', 'EarScope') }}</h1>
-                <p class="text-teal-100 text-xs font-medium relative z-10">Daftar untuk akses konsultasi kesehatan
-                    telinga terintegrasi</p>
+                <p class="text-teal-100 text-xs font-medium relative z-10">Register for integrated ear health consultation access</p>
             </div>
 
             <div class="px-6 py-5">

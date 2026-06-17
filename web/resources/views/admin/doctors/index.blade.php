@@ -3,8 +3,8 @@
 @section('admin-content')
 <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-fade-in-up">
     <div>
-        <h1 class="text-2xl font-bold text-slate-800">Manajemen Data Dokter</h1>
-        <p class="text-xs text-slate-400 font-medium mt-1">Kelola data dokter, username, nomor registrasi lisensi, dan spesialisasi sistem</p>
+        <h1 class="text-2xl font-bold text-slate-800">Doctor Data Management</h1>
+        <p class="text-xs text-slate-400 font-medium mt-1">Manage doctor data, usernames, license numbers, and specializations</p>
     </div>
     
     <a href="{{ route('admin.doctors.create') }}" 
@@ -12,7 +12,7 @@
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
         </svg>
-        Tambah Dokter Baru
+        Add New Doctor
     </a>
 </div>
 
@@ -24,12 +24,12 @@
                 <thead>
                     <tr class="bg-slate-50/75 border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
                         <th class="px-6 py-4">No</th>
-                        <th class="px-6 py-4">Nama Dokter</th>
-                        <th class="px-6 py-4">Username Akun</th>
-                        <th class="px-6 py-4">Nomor Lisensi STR</th>
-                        <th class="px-6 py-4">Spesialisasi</th>
-                        <th class="px-6 py-4">Jenis Kelamin</th>
-                        <th class="px-6 py-4">Aksi</th>
+                        <th class="px-6 py-4">Doctor Name</th>
+                        <th class="px-6 py-4">Account Username</th>
+                        <th class="px-6 py-4">STR License Number</th>
+                        <th class="px-6 py-4">Specialization</th>
+                        <th class="px-6 py-4">Gender</th>
+                        <th class="px-6 py-4">Action</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 text-sm">
@@ -67,7 +67,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                         </svg>
                                     </a>
-                                    <form method="POST" action="{{ route('admin.doctors.delete', $doctor) }}" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus dokter ini dari sistem?');">
+                                    <form method="POST" action="{{ route('admin.doctors.delete', $doctor) }}" class="inline" onsubmit="return confirm('Are you sure you want to delete this doctor from the system?');">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="text-rose-500 hover:text-rose-600 transition">
@@ -89,14 +89,14 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                 </div>
-                <h3 class="text-base font-bold text-slate-700">Belum Ada Data Dokter</h3>
-                <p class="text-xs text-slate-400 mt-1">Sistem belum meregistrasikan akun dokter spesialis manapun.</p>
+                <h3 class="text-base font-bold text-slate-700">No Doctor Data Yet</h3>
+                <p class="text-xs text-slate-400 mt-1">The system has not registered any specialist doctor accounts.</p>
                 <div class="mt-6">
                     <a href="{{ route('admin.doctors.create') }}" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-xs font-semibold rounded-xl text-white bg-teal-600 hover:bg-teal-700 transition">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                         </svg>
-                        Tambah Dokter Baru
+                        Add New Doctor
                     </a>
                 </div>
             </div>

@@ -64,15 +64,10 @@
       </div>
 
       <!-- Info Badge — Pojok Kanan Bawah -->
-      <div class="info-badge" id="infoBadge">
-        <div class="info-row">
-          <span class="info-label">ID Konsultasi</span>
-          <span class="info-value" id="displayConsultationId">{{ consultation_id or '—' }}</span>
-        </div>
-        <div class="info-divider"></div>
-        <div class="info-row">
-          <span class="info-label">Pasien</span>
-          <span class="info-value" id="displayPatientName">{{ patient_name or '—' }}</span>
+      <div class="info-badge" id="infoBadge" style="pointer-events: auto;">
+        <div class="info-row" style="align-items: flex-end;">
+          <label for="inputConsultationId" class="info-label">Consultation ID</label>
+          <input type="text" id="inputConsultationId" class="info-value" placeholder="Enter ID..." value="{{ consultation_id }}" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 4px 8px; border-radius: 6px; outline: none; width: 120px; text-align: right; margin-top: 4px;" />
         </div>
       </div>
 
@@ -106,17 +101,17 @@
       const captureToast = document.getElementById("captureToast");
       const captureToastText = document.getElementById("captureToastText");
 
-      // Ambil consultation_id & patient_name dari URL parameter (dikirim oleh Laravel iframe)
+      // Ambil consultation_id dari URL parameter (dikirim oleh Laravel iframe)
       const urlParams = new URLSearchParams(window.location.search);
-      const consultationId = urlParams.get('consultation_id') || '';
-      const patientName = urlParams.get('patient_name') || '';
-
-      // Update tampilan info badge
-      if (consultationId) {
-        document.getElementById('displayConsultationId').textContent = '#' + consultationId;
+      const urlConsultationId = urlParams.get('consultation_id') || '';
+      
+      const inputConsultationId = document.getElementById('inputConsultationId');
+      if (urlConsultationId) {
+        inputConsultationId.value = urlConsultationId;
       }
-      if (patientName) {
-        document.getElementById('displayPatientName').textContent = decodeURIComponent(patientName);
+
+      function getConsultationId() {
+        return inputConsultationId.value.trim();
       }
 
       let streamStarted = false;
@@ -171,7 +166,7 @@
         await fetch("/stop_recording", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ consultation_id: consultationId }),
+          body: JSON.stringify({ consultation_id: getConsultationId() }),
         });
 
         stopBtn.disabled = true;
@@ -202,15 +197,16 @@
 
       // === START ===
       startBtn.addEventListener("click", () => {
-        if (!consultationId) {
-          alert("ID Konsultasi tidak ditemukan. Silakan buka halaman ini dari menu Diagnosis di website.");
+        const currentConsultationId = getConsultationId();
+        if (!currentConsultationId) {
+          alert("Please enter a Consultation ID.");
           return;
         }
 
         if (!streamStarted) {
           loadingOverlay.classList.add("visible");
 
-          video.src = "/process_video?consultation_id=" + encodeURIComponent(consultationId);
+          video.src = "/process_video?consultation_id=" + encodeURIComponent(currentConsultationId);
           streamStarted = true;
 
           startBtn.disabled = true;
@@ -230,7 +226,7 @@
         await fetch("/stop_recording", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ consultation_id: consultationId }),
+          body: JSON.stringify({ consultation_id: getConsultationId() }),
         });
 
         stopBtn.disabled = true;
@@ -254,7 +250,7 @@
           const response = await fetch("/capture_photo", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ consultation_id: consultationId }),
+            body: JSON.stringify({ consultation_id: getConsultationId() }),
           });
 
           const data = await response.json();

@@ -148,7 +148,7 @@ class DoctorController extends Controller
         // Prevent rescheduling if diagnosis already exists
         if ($consultation->status === 'scheduled' && $consultation->diagnosis) {
             return response()->json([
-                'error' => 'Konsultasi sudah memiliki diagnosis, tidak dapat dijadwalkan ulang'
+                'error' => 'Consultation already has a diagnosis, cannot be rescheduled'
             ], 400);
         }
 
@@ -207,7 +207,7 @@ class DoctorController extends Controller
                 'id' => $consultation->patient->id,
                 'name' => $consultation->patient->name,
                 'age' => $consultation->patient->age,
-                'email' => $consultation->patient->user->email ?? null,
+                'email' => $consultation->patient->email ?? null,
                 'gender' => $consultation->patient->gender,
                 'address' => $consultation->patient->address,
                 'birth_date' => $consultation->patient->birth_date
@@ -277,7 +277,7 @@ class DoctorController extends Controller
         $doctor = $this->getDoctor();
         ActivityLogger::log(
             'consultation_verified',
-            "Dokter '{$doctor->name}' memverifikasi diagnosis pasien '{$consultation->patient->name}'",
+            "Doctor '{$doctor->name}' verified diagnosis for patient '{$consultation->patient->name}'",
             [
                 'consultation_id' => $consultation->id,
                 'diagnosis_id' => $diagnosis->id,
@@ -287,7 +287,7 @@ class DoctorController extends Controller
             $doctor->user_id
         );
 
-        return redirect()->route('doctor.consultations')->with('success', 'Konsultasi berhasil diverifikasi dan diselesaikan.');
+        return redirect()->route('doctor.consultations')->with('success', 'Consultation successfully verified and completed.');
     }
 
     public function patientsProfile()

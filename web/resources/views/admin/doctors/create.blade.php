@@ -12,7 +12,7 @@
         'method' => 'POST',
         'edit' => false,
         'doctor' => null,
-        'submit_label' => 'Tambah Dokter'
+        'submit_label' => 'Add Doctor'
     ])
 </div>
 @endsection

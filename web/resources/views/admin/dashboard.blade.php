@@ -11,7 +11,7 @@
                 <h2 class="font-bold text-2xl text-slate-800 leading-tight">
                     {{ __('Dashboard Admin') }}
                 </h2>
-                <p class="text-xs font-medium text-slate-400 mt-0.5">Kelola data dokter, pantau registrasi pasien, dan audit log aktivitas sistem</p>
+                <p class="text-xs font-medium text-slate-400 mt-0.5">Manage doctor data, monitor patient registrations, and audit system activity logs</p>
             </div>
         </div>
     </x-slot>
@@ -25,7 +25,7 @@
                 <!-- Stats 1: Dokter Aktif -->
                 <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between group hover:-translate-y-1 hover:shadow-md transition-all duration-300">
                     <div>
-                        <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Dokter Aktif</h3>
+                        <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Active Doctors</h3>
                         <p class="text-3xl font-extrabold text-slate-800 mt-2">
                             {{ $stats['total_doctors'] ?? 0 }}
                         </p>
@@ -40,7 +40,7 @@
                 <!-- Stats 2: Pasien Terdaftar -->
                 <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between group hover:-translate-y-1 hover:shadow-md transition-all duration-300">
                     <div>
-                        <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Pasien Terdaftar</h3>
+                        <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Registered Patients</h3>
                         <p class="text-3xl font-extrabold text-slate-800 mt-2">
                             {{ $stats['total_patients'] ?? 0 }}
                         </p>
@@ -55,7 +55,7 @@
                 <!-- Stats 3: Konsultasi Bulan Ini -->
                 <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between group hover:-translate-y-1 hover:shadow-md transition-all duration-300">
                     <div>
-                        <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Konsultasi Bulan Ini</h3>
+                        <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Consultations This Month</h3>
                         <p class="text-3xl font-extrabold text-slate-800 mt-2">
                             {{ $stats['total_consultations_month'] ?? 0 }}
                         </p>
@@ -74,8 +74,8 @@
 
                 <a href="{{ route('admin.doctors.index') }}" class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm group hover:-translate-y-0.5 hover:shadow-md transition-all duration-300 flex items-center justify-between gap-4">
                     <div>
-                        <h3 class="font-bold text-lg text-slate-800">Manajemen Data Dokter</h3>
-                        <p class="text-slate-400 text-xs mt-1">Kelola lisensi, username, spesialisasi, dan biodata dokter sistem</p>
+                        <h3 class="font-bold text-lg text-slate-800">Doctor Data Management</h3>
+                        <p class="text-slate-400 text-xs mt-1">Manage licenses, usernames, specializations, and doctor biodata</p>
                     </div>
                     <div class="p-3 bg-teal-50 text-teal-600 rounded-xl group-hover:bg-teal-600 group-hover:text-white transition duration-300">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -86,8 +86,8 @@
                 
                 <a href="{{ route('admin.patients.index') }}" class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm group hover:-translate-y-0.5 hover:shadow-md transition-all duration-300 flex items-center justify-between gap-4">
                     <div>
-                        <h3 class="font-bold text-lg text-slate-800">Manajemen Data Pasien</h3>
-                        <p class="text-slate-400 text-xs mt-1">Lihat dan monitor daftar registrasi pasien yang aktif di sistem</p>
+                        <h3 class="font-bold text-lg text-slate-800">Patient Data Management</h3>
+                        <p class="text-slate-400 text-xs mt-1">View and monitor the list of active patient registrations in the system</p>
                     </div>
                     <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl group-hover:bg-emerald-600 group-hover:text-white transition duration-300">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -101,8 +101,8 @@
             <!-- CHART -->
             <div class="bg-white shadow-sm border border-slate-100 rounded-2xl p-6">
                 <div class="mb-5">
-                    <h3 class="font-bold text-lg text-slate-800">Statistik Konsultasi Bulanan</h3>
-                    <p class="text-xs text-slate-400 mt-0.5">Visualisasi total konsultasi masuk selama 6 bulan terakhir</p>
+                    <h3 class="font-bold text-lg text-slate-800">Monthly Consultation Statistics</h3>
+                    <p class="text-xs text-slate-400 mt-0.5">Visualization of total incoming consultations over the last 6 months</p>
                 </div>
                 <div class="w-full">
                     <canvas id="consultationChart" height="90"></canvas>
@@ -113,12 +113,12 @@
             <div class="bg-white shadow-sm border border-slate-100 rounded-2xl overflow-hidden">
                 <div class="p-6 border-b border-slate-100">
                     <h3 class="font-bold text-lg text-slate-800">Audit Log & Aktivitas Sistem</h3>
-                    <p class="text-xs text-slate-400 mt-0.5">Catatan audit log real-time dari tindakan admin, dokter, dan pasien</p>
+                    <p class="text-xs text-slate-400 mt-0.5">Real-time audit log of admin, doctor, and patient actions</p>
                 </div>
 
                 @if(empty($activityLogs))
                     <div class="text-center py-12 px-6">
-                        <p class="text-slate-400 text-sm">Tidak ada aktivitas sistem yang tercatat.</p>
+                        <p class="text-slate-400 text-sm">No system activity recorded.</p>
                     </div>
                 @else
                     <div class="overflow-x-auto">
@@ -179,7 +179,7 @@
             data: {
                 labels: consultationData.labels,
                 datasets: [{
-                    label: 'Jumlah Konsultasi',
+                    label: 'Total Consultations',
                     data: consultationData.data,
                     backgroundColor: 'rgba(13, 148, 136, 0.75)',
                     borderColor: 'rgba(13, 148, 136, 1)',

@@ -119,7 +119,7 @@
                     {{ __('Consultation Request') }}
                 </x-responsive-nav-link>
                 <x-responsive-nav-link href="/doctor/diagnoses" :active="request()->is('doctor/diagnoses*')" class="!text-white">
-                    {{ __('Hasil Pemeriksaan') }}
+                    {{ __('Diagnoses') }}
                 </x-responsive-nav-link>
                 <x-responsive-nav-link href="/doctor/patients-profile" :active="request()->is('doctor/patients-profile*')" class="!text-white">
                     {{ __('Patients Profile') }}
@@ -129,7 +129,7 @@
                     {{ __('Consultation Request') }}
                 </x-responsive-nav-link>
                 <x-responsive-nav-link href="/patient/diagnoses" :active="request()->is('patient/diagnoses*')" class="!text-white">
-                    {{ __('Hasil Pemeriksaan') }}
+                    {{ __('Consultation Results') }}
                 </x-responsive-nav-link>
             @elseif($role === 'admin')
                 <x-responsive-nav-link href="/admin/doctors" :active="request()->is('admin/doctors*')" class="!text-white">

@@ -8,9 +8,9 @@
             </div>
             <div>
                 <h2 class="font-bold text-2xl text-slate-800 leading-tight">
-                    {{ __('Daftar Permintaan Konsultasi') }}
+                    {{ __('Consultation Request List') }}
                 </h2>
-                <p class="text-xs font-medium text-slate-400 mt-0.5">Kelola janji temu dan diagnosa keluhan telinga pasien</p>
+                <p class="text-xs font-medium text-slate-400 mt-0.5">Manage appointments and ear complaint diagnoses</p>
             </div>
         </div>
     </x-slot>
@@ -50,8 +50,8 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                 </svg>
                             </div>
-                            <h4 class="text-base font-bold text-slate-700">Tidak Ada Permintaan</h4>
-                            <p class="text-xs text-slate-400 mt-1">Belum ada pasien yang mengajukan sesi konsultasi untuk status ini.</p>
+                            <h4 class="text-base font-bold text-slate-700">No Requests</h4>
+                            <p class="text-xs text-slate-400 mt-1">No patients have submitted consultation requests for this status.</p>
                         </div>
                     @else
                         <div class="overflow-x-auto">
@@ -80,12 +80,12 @@
                                                         <span class="font-bold text-slate-800">
                                                             {{ $consultation->patient->name ?? 'N/A' }}
                                                         </span>
-                                                        <p class="text-[10px] text-slate-400 font-semibold mt-0.5">Umur: {{ $consultation->patient->age ?? '-' }} Tahun</p>
+                                                        <p class="text-[10px] text-slate-400 font-semibold mt-0.5">Age: {{ $consultation->patient->age ?? '-' }} years</p>
                                                     </div>
                                                 </div>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                                                {{ $consultation->patient->user->email ?? 'N/A' }}
+                                                {{ $consultation->patient->email ?? 'N/A' }}
                                             </td>
                                             <td class="px-6 py-4 text-slate-600 font-medium max-w-xs truncate">
                                                 {{ Str::limit($consultation->complaint, 45) }}
@@ -105,7 +105,7 @@
                                                         <span class="text-[11px] text-slate-400 font-medium">{{ $consultation->scheduled_time }} WIB</span>
                                                     </div>
                                                 @else
-                                                    <span class="text-xs text-slate-400 font-medium italic">Belum dijadwalkan</span>
+                                                    <span class="text-xs text-slate-400 font-medium italic">Not yet scheduled</span>
                                                 @endif
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-xs font-semibold uppercase tracking-wider space-x-2.5">
@@ -172,14 +172,14 @@
                 dataType: 'json',
                 success: function(data) {
                     // Define helper variables
-                    const genderMap = { 'male': 'Laki-laki', 'female': 'Perempuan' };
+                    const genderMap = { 'male': 'Male', 'female': 'Female' };
                     const gender = genderMap[data.patient?.gender] || data.patient?.gender || '-';
 
                     const statusConfig = {
-                        'pending':   { label: 'Menunggu',    class: 'bg-amber-50 text-amber-700 border-amber-200/50' },
-                        'scheduled': { label: 'Dijadwalkan', class: 'bg-emerald-50 text-emerald-700 border-emerald-200/50' },
-                        'cancelled': { label: 'Dibatalkan',  class: 'bg-rose-50 text-rose-700 border-rose-200/50' },
-                        'done':      { label: 'Selesai',     class: 'bg-sky-50 text-sky-700 border-sky-200/50' },
+                        'pending':   { label: 'Pending',    class: 'bg-amber-50 text-amber-700 border-amber-200/50' },
+                        'scheduled': { label: 'Scheduled', class: 'bg-emerald-50 text-emerald-700 border-emerald-200/50' },
+                        'cancelled': { label: 'Cancelled',  class: 'bg-rose-50 text-rose-700 border-rose-200/50' },
+                        'done':      { label: 'Done',     class: 'bg-sky-50 text-sky-700 border-sky-200/50' },
                     };
                     const sc = statusConfig[data.status] || { label: data.status, class: 'bg-slate-50 text-slate-700 border-slate-200/50' };
                     const statusLabel = sc.label;
@@ -196,7 +196,7 @@
                                     <img src="${img.image_url}" alt="Otoscope" class="w-full h-36 object-cover" />
                                     ${img.ai_screening_result ? `
                                         <div class="p-2.5">
-                                            <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Hasil AI</p>
+                                            <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">AI Result</p>
                                             <p class="text-xs font-bold text-slate-700 mt-0.5">${typeof img.ai_screening_result === 'object' ? JSON.stringify(img.ai_screening_result) : img.ai_screening_result}</p>
                                         </div>
                                     ` : ''}
@@ -206,21 +206,21 @@
 
                         aiSection = `
                             <div class="pt-5 border-t border-slate-100">
-                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3">Hasil Pemeriksaan AI Otoskop</p>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3">AI Otoscope Examination Results</p>
                                 <div class="bg-slate-50 rounded-xl p-3 mb-3">
                                     <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Diagnosis</p>
                                     <p class="text-sm font-bold text-slate-800 mt-0.5">${d.diagnosis_result || '-'}</p>
                                 </div>
                                 ${d.notes ? `
                                     <div class="bg-slate-50 rounded-xl p-3 mb-3">
-                                        <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Catatan Dokter</p>
+                                        <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Doctor Notes</p>
                                         <p class="text-sm text-slate-700 mt-0.5">${d.notes}</p>
                                     </div>
                                 ` : ''}
                                 <div class="bg-slate-50 rounded-xl p-3 mb-3">
-                                    <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Status Verifikasi</p>
+                                    <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Verification Status</p>
                                     <span class="mt-1 inline-flex px-2 py-0.5 text-xs font-bold rounded-full border ${d.is_verified ? 'bg-emerald-50 text-emerald-700 border-emerald-200/50' : 'bg-amber-50 text-amber-700 border-amber-200/50'}">
-                                        ${d.is_verified ? 'Terverifikasi' : 'Belum Diverifikasi'}
+                                        ${d.is_verified ? 'Verified' : 'Not Verified'}
                                     </span>
                                 </div>
                                 ${imagesHtml ? `
@@ -230,9 +230,9 @@
 
                             ${!d.is_verified && data.status !== 'done' ? `
                                 <div class="pt-5 border-t border-slate-100">
-                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3">Verifikasi Dokter</p>
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3">Doctor Verification</p>
                                     <form id="verifyForm" onsubmit="submitVerification(event, ${data.id})">
-                                        <textarea id="doctorNotes" rows="3" class="w-full rounded-xl border-slate-200 text-sm placeholder-slate-300 focus:border-teal-400 focus:ring-teal-400" placeholder="Tambahkan catatan dokter (opsional)...">${d.notes || ''}</textarea>
+                                        <textarea id="doctorNotes" rows="3" class="w-full rounded-xl border-slate-200 text-sm placeholder-slate-300 focus:border-teal-400 focus:ring-teal-400" placeholder="Add doctor notes (optional)...">${d.notes || ''}</textarea>
                                     </form>
                                 </div>
                             ` : ''}
@@ -240,10 +240,10 @@
                     } else if (data.status === 'approved' || data.status === 'scheduled') {
                         aiSection = `
                             <div class="pt-5 border-t border-slate-100">
-                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3">Verifikasi Dokter</p>
-                                <p class="text-xs text-slate-400 mb-3">Hasil pemeriksaan AI belum tersedia. Anda dapat menyelesaikan secara manual.</p>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3">Doctor Verification</p>
+                                <p class="text-xs text-slate-400 mb-3">AI examination results are not yet available. You can complete manually.</p>
                                 <form id="verifyForm" onsubmit="submitVerification(event, ${data.id})">
-                                    <textarea id="doctorNotes" rows="3" class="w-full rounded-xl border-slate-200 text-sm placeholder-slate-300 focus:border-teal-400 focus:ring-teal-400" placeholder="Tambahkan catatan dokter (opsional)..."></textarea>
+                                    <textarea id="doctorNotes" rows="3" class="w-full rounded-xl border-slate-200 text-sm placeholder-slate-300 focus:border-teal-400 focus:ring-teal-400" placeholder="Add doctor notes (optional)..."></textarea>
                                 </form>
                             </div>
                         `;
@@ -253,36 +253,36 @@
                     let content = `
                         <div class="space-y-0">
                             <div>
-                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3">Data Pasien</p>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3">Patient Data</p>
                                 <div class="grid grid-cols-2 gap-3">
                                     <div class="bg-slate-50 rounded-xl p-3">
-                                        <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Nama</p>
+                                        <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Name</p>
                                         <p class="text-sm font-bold text-slate-800 mt-0.5">${data.patient?.name ?? '-'}</p>
                                     </div>
                                     <div class="bg-slate-50 rounded-xl p-3">
-                                        <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Usia</p>
-                                        <p class="text-sm font-bold text-slate-800 mt-0.5">${data.patient?.age ?? '-'} Tahun</p>
+                                        <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Age</p>
+                                        <p class="text-sm font-bold text-slate-800 mt-0.5">${data.patient?.age ?? '-'} years</p>
                                     </div>
                                     <div class="bg-slate-50 rounded-xl p-3">
                                         <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Email</p>
                                         <p class="text-sm font-bold text-slate-800 mt-0.5">${data.patient?.email ?? '-'}</p>
                                     </div>
                                     <div class="bg-slate-50 rounded-xl p-3">
-                                        <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Jenis Kelamin</p>
+                                        <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Gender</p>
                                         <p class="text-sm font-bold text-slate-800 mt-0.5">${gender}</p>
                                     </div>
                                     <div class="col-span-2 bg-slate-50 rounded-xl p-3">
-                                        <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Alamat</p>
+                                        <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Address</p>
                                         <p class="text-sm font-bold text-slate-800 mt-0.5">${data.patient?.address ?? '-'}</p>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="pt-5 border-t border-slate-100">
-                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3">Detail Konsultasi</p>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3">Consultation Details</p>
                                 <div class="grid grid-cols-2 gap-3">
                                     <div class="col-span-2 bg-slate-50 rounded-xl p-3">
-                                        <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Keluhan Pasien</p>
+                                        <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Patient Complaint</p>
                                         <p class="text-sm text-slate-700 mt-1 leading-relaxed">${data.complaint}</p>
                                     </div>
                                     <div class="bg-slate-50 rounded-xl p-3">
@@ -290,9 +290,9 @@
                                         <span class="mt-1 inline-flex px-2 py-0.5 text-xs font-bold rounded-full border ${statusClass}">${statusLabel}</span>
                                     </div>
                                     <div class="bg-slate-50 rounded-xl p-3">
-                                        <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Jadwal</p>
+                                        <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Schedule</p>
                                         <p class="text-sm font-bold text-slate-800 mt-0.5">
-                                            ${data.scheduled_date ? data.scheduled_date + ' · ' + data.scheduled_time : 'Belum dijadwalkan'}
+                                            ${data.scheduled_date ? data.scheduled_date + ' · ' + data.scheduled_time : 'Not yet scheduled'}
                                         </p>
                                     </div>
                                 </div>
@@ -309,14 +309,14 @@
                     if (showVerify || showManualVerify) {
                         $('#modalFooter').html(`
                             <button type="button" onclick="closeDetailModal()" class="px-4 py-2 text-xs font-semibold uppercase tracking-wider rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 transition mr-2">
-                                Tutup
+                                Close
                             </button>
                             <button type="button" onclick="$('#verifyForm').submit()"
                                 class="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white transition shadow-md shadow-teal-500/20">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                 </svg>
-                                Verifikasi & Selesaikan
+                                Verify & Complete
                             </button>`);
                     }
                 },
@@ -326,7 +326,7 @@
                             <svg class="w-12 h-12 mx-auto mb-3 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
-                            <p class="text-xs font-medium">Gagal memuat detail konsultasi</p>
+                            <p class="text-xs font-medium">Failed to load consultation details</p>
                         </div>
                     `);
                 }
@@ -348,7 +348,7 @@
                 },
                 success: function() {
                     closeDetailModal();
-                    showNotification('Konsultasi berhasil diverifikasi & diselesaikan', 'success');
+                    showNotification('Consultation verified & completed successfully', 'success');
                     // Update the badge in the table
                     setTimeout(() => location.reload(), 1500);
                 },
@@ -356,8 +356,8 @@
                     btn.prop('disabled', false).html(`
                         <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg> Verifikasi & Selesaikan`);
-                    showNotification('Gagal menyimpan verifikasi', 'error');
+                        </svg> Verify & Complete`);
+                    showNotification('Failed to save verification', 'error');
                 }
             });
         }
@@ -372,7 +372,7 @@
         }
 
         function rejectConsultation(consultationId) {
-            if (confirm('Apakah Anda yakin ingin menolak konsultasi ini?')) {
+            if (confirm('Are you sure you want to reject this consultation?')) {
                 $.ajax({
                     url: '/doctor/consultation/' + consultationId + '/reject',
                     type: 'POST',
@@ -384,7 +384,7 @@
                         showNotification('Consultation cancelled successfully', 'success');
                     },
                     error: function(xhr) {
-                        showNotification('Gagal menolak konsultasi', 'error');
+                        showNotification('Failed to reject consultation', 'error');
                     }
                 });
             }

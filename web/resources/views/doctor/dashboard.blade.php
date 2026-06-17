@@ -8,9 +8,9 @@
             </div>
             <div>
                 <h2 class="font-bold text-2xl text-slate-800 leading-tight">
-                    {{ __('Dashboard Dokter') }}
+                    {{ __('Doctor Dashboard') }}
                 </h2>
-                <p class="text-xs font-medium text-slate-400 mt-0.5">Ringkasan aktivitas diagnosis pasien dan konsultasi klinis Anda</p>
+                <p class="text-xs font-medium text-slate-400 mt-0.5">Summary of patient diagnosis activity and your clinical consultations</p>
             </div>
         </div>
     </x-slot>
@@ -24,7 +24,7 @@
                 <!-- Stats 1 -->
                 <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between group hover:-translate-y-1 hover:shadow-md transition-all duration-300">
                     <div>
-                        <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Konsultasi Tertunda</h3>
+                        <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Pending Consultations</h3>
                         <p class="text-3xl font-extrabold text-slate-800 mt-2">{{ $pendingCount }}</p>
                     </div>
                     <div class="p-4 bg-amber-50 rounded-2xl text-amber-500 group-hover:bg-amber-100/70 transition-colors">
@@ -37,7 +37,7 @@
                 <!-- Stats 2 -->
                 <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between group hover:-translate-y-1 hover:shadow-md transition-all duration-300">
                     <div>
-                        <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Jadwal Hari Ini</h3>
+                        <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Today's Schedule</h3>
                         <p class="text-3xl font-extrabold text-slate-800 mt-2">{{ $todayScheduleCount }}</p>
                     </div>
                     <div class="p-4 bg-teal-50 rounded-2xl text-teal-600 group-hover:bg-teal-100/70 transition-colors">
@@ -50,7 +50,7 @@
                 <!-- Stats 3 -->
                 <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between group hover:-translate-y-1 hover:shadow-md transition-all duration-300">
                     <div>
-                        <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Pasien Ditangani</h3>
+                        <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Patients Handled</h3>
                         <p class="text-3xl font-extrabold text-slate-800 mt-2">{{ $patientsHandledCount }}</p>
                     </div>
                     <div class="p-4 bg-emerald-50 rounded-2xl text-emerald-600 group-hover:bg-emerald-100/70 transition-colors">
@@ -73,15 +73,15 @@
                         </a>
                         <a href="{{ route('doctor.dashboard', ['filter' => 'today']) }}"
                            class="px-4 py-2 rounded-md text-sm font-medium {{ $filter === 'today' ? 'bg-indigo-100 text-indigo-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
-                            Hari Ini
+                            Today
                         </a>
                         <a href="{{ route('doctor.dashboard', ['filter' => 'week']) }}"
                            class="px-4 py-2 rounded-md text-sm font-medium {{ $filter === 'week' ? 'bg-indigo-100 text-indigo-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
-                            Minggu Ini
+                            This Week
                         </a>
                         <a href="{{ route('doctor.dashboard', ['filter' => 'month']) }}"
                            class="px-4 py-2 rounded-md text-sm font-medium {{ $filter === 'month' ? 'bg-indigo-100 text-indigo-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
-                            Bulan Ini
+                            This Month
                         </a>
                     </div>
                 </div>
@@ -119,10 +119,10 @@
                                         <td class="px-6 py-4">
                                             @php
                                                 $statusMap = [
-                                                    'pending'   => ['label' => 'Menunggu',   'class' => 'bg-amber-50 text-amber-700 border-amber-200/50'],
-                                                    'scheduled' => ['label' => 'Dijadwalkan','class' => 'bg-emerald-50 text-emerald-700 border-emerald-200/50'],
-                                                    'cancelled' => ['label' => 'Dibatalkan', 'class' => 'bg-rose-50 text-rose-700 border-rose-200/50'],
-                                                    'done'      => ['label' => 'Selesai',    'class' => 'bg-sky-50 text-sky-700 border-sky-200/50'],
+                                                    'pending'   => ['label' => 'Pending',   'class' => 'bg-amber-50 text-amber-700 border-amber-200/50'],
+                                                    'scheduled' => ['label' => 'Scheduled','class' => 'bg-emerald-50 text-emerald-700 border-emerald-200/50'],
+                                                    'cancelled' => ['label' => 'Cancelled', 'class' => 'bg-rose-50 text-rose-700 border-rose-200/50'],
+                                                    'done'      => ['label' => 'Done',    'class' => 'bg-sky-50 text-sky-700 border-sky-200/50'],
                                                 ];
                                                 $s = $statusMap[$consultation->status] ?? ['label' => ucfirst($consultation->status), 'class' => 'bg-slate-50 text-slate-700 border-slate-200/50'];
                                             @endphp
@@ -166,7 +166,7 @@
                                             {{ $request->patient->name ?? 'N/A' }}
                                         </td>
                                         <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-700">
-                                            {{ $request->patient->user->email ?? 'N/A' }}
+                                            {{ $request->patient->email ?? 'N/A' }}
                                         </td>
                                         <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
                                             {{ Str::limit($request->complaint, 40) }}
