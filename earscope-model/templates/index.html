@@ -65,9 +65,18 @@
 
       <!-- Info Badge — Pojok Kanan Bawah -->
       <div class="info-badge" id="infoBadge" style="pointer-events: auto;">
-        <div class="info-row" style="align-items: flex-end;">
+        <div class="info-row" style="align-items: flex-end; margin-bottom: 8px;">
           <label for="inputConsultationId" class="info-label">Consultation ID</label>
           <input type="text" id="inputConsultationId" class="info-value" placeholder="Enter ID..." value="{{ consultation_id }}" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 4px 8px; border-radius: 6px; outline: none; width: 120px; text-align: right; margin-top: 4px;" />
+        </div>
+        <div class="info-row" style="align-items: flex-end;">
+          <label for="selectCamera" class="info-label">Camera Device</label>
+          <select id="selectCamera" class="info-value" style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 4px 8px; border-radius: 6px; outline: none; width: 138px; text-align: right; margin-top: 4px; cursor: pointer; font-size: 13px;">
+            <option value="0" style="color: black;" selected>Camera 0</option>
+            <option value="1" style="color: black;">Camera 1</option>
+            <option value="2" style="color: black;">Camera 2</option>
+            <option value="3" style="color: black;">Camera 3</option>
+          </select>
         </div>
       </div>
 
@@ -77,7 +86,7 @@
           <i class="fas fa-video"></i> Mulai Rekam
         </button>
 
-        <button class="btn btn-capture" id="captureBtn" disabled>
+        <button class="btn btn-capture" id="captureBtn">
           <i class="fas fa-camera"></i> Ambil Foto
         </button>
 
@@ -163,78 +172,148 @@
 
       async function autoStop() {
         stopTimer();
-        await fetch("/stop_recording", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ consultation_id: getConsultationId() }),
-        });
+        showCaptureToast("Waktu habis! Memproses video rekaman...", false);
+        
+        try {
+          const response = await fetch("/stop_recording", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ consultation_id: getConsultationId() }),
+          });
+          const data = await response.json();
+          if (data.status === 'stopping') {
+            showCaptureToast("Rekaman selesai & sedang diproses AI.", false);
+          } else {
+            showCaptureToast(data.message || "Gagal memproses rekaman.", true);
+          }
+        } catch (err) {
+          showCaptureToast("Gagal memproses rekaman: " + err.message, true);
+        }
 
         stopBtn.disabled = true;
-        captureBtn.disabled = true;
         startBtn.disabled = false;
+        selectCamera.disabled = false;
+        inputConsultationId.disabled = false;
         streamStarted = false;
-
-        setTimeout(() => location.reload(), 500);
       }
 
       async function checkInternet() {
         try {
           const response = await fetch("/health", { method: "GET" });
           const connected = response.ok;
-
           noInternet.classList.toggle("visible", !connected);
-
-          if (connected && streamStarted && !timer.classList.contains("visible")) {
-            startTimer();
-          }
         } catch (e) {
           noInternet.classList.add("visible");
-          stopTimer();
         }
       }
 
       setInterval(checkInternet, 5000);
 
+      const selectCamera = document.getElementById("selectCamera");
+
+      function startPreview() {
+        const selectedCamera = selectCamera.value || "0";
+        loadingOverlay.classList.add("visible");
+        video.src = "/video_feed?camera_id=" + encodeURIComponent(selectedCamera);
+        video.onload = () => {
+          loadingOverlay.classList.remove("visible");
+        };
+      }
+
+      selectCamera.addEventListener("change", () => {
+        if (!streamStarted) {
+          startPreview();
+        }
+      });
+
+      // Load available cameras dynamically on page load
+      async function loadCameras() {
+        try {
+          const response = await fetch("/get_cameras");
+          const data = await response.json();
+          if (data.cameras && data.cameras.length > 0) {
+            selectCamera.innerHTML = "";
+            data.cameras.forEach(camIdx => {
+              const option = document.createElement("option");
+              option.value = camIdx;
+              option.textContent = `Camera ${camIdx}`;
+              option.style.color = "black";
+              if (camIdx === 0) option.selected = true;
+              selectCamera.appendChild(option);
+            });
+          }
+        } catch (err) {
+          console.error("Gagal mendeteksi kamera:", err);
+        } finally {
+          startPreview();
+        }
+      }
+      loadCameras();
+
       // === START ===
-      startBtn.addEventListener("click", () => {
+      startBtn.addEventListener("click", async () => {
         const currentConsultationId = getConsultationId();
         if (!currentConsultationId) {
           alert("Please enter a Consultation ID.");
           return;
         }
 
-        if (!streamStarted) {
-          loadingOverlay.classList.add("visible");
+        startBtn.disabled = true;
+        startBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyiapkan...';
 
-          video.src = "/process_video?consultation_id=" + encodeURIComponent(currentConsultationId);
-          streamStarted = true;
-
-          startBtn.disabled = true;
-          stopBtn.disabled = false;
-          captureBtn.disabled = false;
-
-          video.onload = () => {
-            loadingOverlay.classList.remove("visible");
-          };
+        try {
+          const response = await fetch("/start_recording", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ consultation_id: currentConsultationId }),
+          });
+          const data = await response.json();
+          if (data.status === 'success') {
+            streamStarted = true;
+            selectCamera.disabled = true; // Nonaktifkan ganti kamera saat live streaming
+            inputConsultationId.disabled = true; // Nonaktifkan ganti ID saat live streaming
+            stopBtn.disabled = false;
+            startTimer();
+          } else {
+            alert(data.message || "Gagal memulai perekaman.");
+            startBtn.disabled = false;
+          }
+        } catch (err) {
+          alert("Gagal menghubungi server: " + err.message);
+          startBtn.disabled = false;
+        } finally {
+          startBtn.innerHTML = '<i class="fas fa-video"></i> Mulai Rekam';
         }
       });
 
       // === STOP ===
       stopBtn.addEventListener("click", async () => {
         stopTimer();
-
-        await fetch("/stop_recording", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ consultation_id: getConsultationId() }),
-        });
-
         stopBtn.disabled = true;
-        captureBtn.disabled = true;
-        startBtn.disabled = false;
-        streamStarted = false;
+        stopBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
 
-        setTimeout(() => location.reload(), 500);
+        try {
+          const response = await fetch("/stop_recording", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ consultation_id: getConsultationId() }),
+          });
+          const data = await response.json();
+          if (data.status === 'stopping') {
+            showCaptureToast("Rekaman selesai & sedang diproses AI.", false);
+          } else {
+            showCaptureToast(data.message || "Gagal memproses rekaman.", true);
+          }
+        } catch (err) {
+          showCaptureToast("Gagal memproses rekaman: " + err.message, true);
+        } finally {
+          stopBtn.innerHTML = '<i class="fas fa-stop"></i> Berhenti';
+          stopBtn.disabled = true;
+          startBtn.disabled = false;
+          selectCamera.disabled = false;
+          inputConsultationId.disabled = false;
+          streamStarted = false;
+        }
       });
 
       // === CAPTURE FOTO ===
@@ -266,9 +345,7 @@
           showCaptureToast("Gagal mengambil foto: " + err.message, true);
         } finally {
           isCapturing = false;
-          if (streamStarted) {
-            captureBtn.disabled = false;
-          }
+          captureBtn.disabled = false;
           captureBtn.innerHTML = '<i class="fas fa-camera"></i> Ambil Foto';
         }
       });

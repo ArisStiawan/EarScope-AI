@@ -121,12 +121,18 @@
 
                 <!-- PROCESSED VIDEO FROM EARSCOPE -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">
-                        Ear Examination Video
-                        <span id="pollingBadge" class="ml-2 inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-800">
-                            <span class="animate-pulse w-2 h-2 rounded-full bg-yellow-500 inline-block"></span>
-                            Waiting for earscope data...
+                    <label class="block text-sm font-medium text-gray-700 flex items-center justify-between">
+                        <span>
+                            Ear Examination Video
+                            <span id="pollingBadge" class="ml-2 inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-800">
+                                <span class="animate-pulse w-2 h-2 rounded-full bg-yellow-500 inline-block"></span>
+                                Waiting for earscope data...
+                            </span>
                         </span>
+                        <button type="button" id="retryPollingBtn" onclick="resetEarscopeState()" class="inline-flex items-center px-2 py-1 bg-red-50 text-red-700 border border-red-200 text-xs font-semibold rounded hover:bg-red-100 transition-colors hidden">
+                            <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H18.5"></path></svg>
+                            Re-take/Retry
+                        </button>
                     </label>
                     <div id="earVideoContainer" class="mt-2 p-4 border-2 border-dashed border-gray-300 rounded-lg text-center bg-gray-50 min-h-[120px] flex items-center justify-center">
                         <p class="text-sm text-gray-400">Examination video will appear automatically after the earscope device sends data.</p>
@@ -251,6 +257,9 @@
         }
 
         function renderEarscopeResult(data) {
+            // --- Show Retry button ---
+            $('#retryPollingBtn').removeClass('hidden');
+
             // --- Badge status ---
             $('#pollingBadge')
                 .removeClass('bg-yellow-100 text-yellow-800')
@@ -269,6 +278,32 @@
                 $('#earVideoContainer').html(
                     '<p class="text-sm text-gray-400">Earscope video not available.</p>'
                 );
+            }
+        }
+
+        function resetEarscopeState() {
+            if (confirm("Are you sure you want to re-take the examination? This will clear the current display and wait for new data from the device.")) {
+                earscopeLoaded = false;
+                
+                // Hide retry button
+                $('#retryPollingBtn').addClass('hidden');
+                
+                // Reset badge back to yellow
+                $('#pollingBadge')
+                    .removeClass('bg-green-100 text-green-800')
+                    .addClass('bg-yellow-100 text-yellow-800')
+                    .html('<span class="animate-pulse w-2 h-2 rounded-full bg-yellow-500 inline-block"></span> Waiting for earscope data...');
+                
+                // Reset video container
+                $('#earVideoContainer').html('<p class="text-sm text-gray-400">Examination video will appear automatically after the earscope device sends data.</p>');
+                
+                // Reset AI text
+                $('#aiResultPlaceholder').removeClass('hidden');
+                $('#aiResultText').addClass('hidden').text('');
+                
+                // Reset text area
+                const textarea = document.getElementById('diagnosis_result');
+                if (textarea) textarea.value = '';
             }
         }
 
@@ -339,6 +374,7 @@
             document.getElementById('photoGallerySection').style.display = 'none';
 
             // Reset earscope display
+            $('#retryPollingBtn').addClass('hidden');
             $('#pollingBadge')
                 .removeClass('bg-green-100 text-green-800')
                 .addClass('bg-yellow-100 text-yellow-800')
