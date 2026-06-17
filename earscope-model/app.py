@@ -160,9 +160,10 @@ def process_video():
         return jsonify({'status': 'error', 'message': 'Tidak ada koneksi internet. Coba lagi nanti.'}), 503
     global recording_data
 
-    # Ambil consultation_id dari query string
+    # Ambil consultation_id dan camera_index dari query string
     consultation_id = request.args.get('consultation_id', '')
-    logger.info(f"[process_video] consultation_id={consultation_id}")
+    camera_index = request.args.get('camera_index', None)
+    logger.info(f"[process_video] consultation_id={consultation_id}, camera_index={camera_index}")
 
     # Reset recording data
     recording_data = {
@@ -173,7 +174,7 @@ def process_video():
     }
     stop_event.clear()
     logger.info("Starting video processing and recording")
-    return Response(record_and_stream(consultation_id), mimetype='multipart/x-mixed-replace; boundary=frame')
+    return Response(record_and_stream(consultation_id, camera_index), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route('/stop_recording', methods=['POST'])
 def stop_recording():
@@ -304,24 +305,56 @@ def api_sender_worker():
 # Jalankan worker thread sekali saat app mulai
 threading.Thread(target=api_sender_worker, daemon=True).start()
 
-def record_and_stream(consultation_id=''):
+def record_and_stream(consultation_id='', camera_index=None):
     global recording_data, latest_frame
-    logger.info(f"Starting recording and streaming process (consultation_id={consultation_id})")
+    logger.info(f"Starting recording and streaming process (consultation_id={consultation_id}, camera_index={camera_index})")
 
-    # --- Auto-detect kamera: coba index 0, 1, 2 ---
-    cap = 0
-    for cam_idx in [0, 1, 2]:
-        logger.info(f"Mencoba kamera index {cam_idx}...")
-        test_cap = cv2.VideoCapture(cam_idx, cv2.CAP_DSHOW)
-        if test_cap.isOpened():
-            ret, _ = test_cap.read()
-            if ret:
-                cap = test_cap
-                logger.info(f"Kamera ditemukan di index {cam_idx}")
-                break
-        test_cap.release()
+    cap = None
+    backend = cv2.CAP_DSHOW if os.name == 'nt' else cv2.CAP_ANY
 
-    if cap is None or not cap.isOpened():
+    # 1. Coba kamera yang dipilih secara manual jika ada
+    if camera_index is not None and camera_index != 'auto':
+        try:
+            cam_idx = int(camera_index)
+            logger.info(f"Mencoba kamera manual index {cam_idx}...")
+            test_cap = cv2.VideoCapture(cam_idx, backend)
+            if test_cap.isOpened():
+                ret, _ = test_cap.read()
+                if ret:
+                    cap = test_cap
+                    logger.info(f"Kamera manual ditemukan di index {cam_idx}")
+                else:
+                    test_cap.release()
+            else:
+                test_cap.release()
+        except Exception as e:
+            logger.error(f"Error membuka kamera manual index {camera_index}: {e}")
+
+    # 2. Fallback ke deteksi otomatis jika kamera manual tidak ditemukan atau tidak dipilih
+    if cap is None or not hasattr(cap, 'isOpened') or not cap.isOpened():
+        logger.info("Mulai deteksi otomatis kamera...")
+        # Skip index manual jika tadi sudah dicoba dan gagal
+        skip_idx = None
+        if camera_index is not None and camera_index != 'auto':
+            try:
+                skip_idx = int(camera_index)
+            except ValueError:
+                pass
+
+        for cam_idx in [0, 1, 2]:
+            if cam_idx == skip_idx:
+                continue
+            logger.info(f"Mencoba kamera index {cam_idx}...")
+            test_cap = cv2.VideoCapture(cam_idx, backend)
+            if test_cap.isOpened():
+                ret, _ = test_cap.read()
+                if ret:
+                    cap = test_cap
+                    logger.info(f"Kamera ditemukan di index {cam_idx}")
+                    break
+            test_cap.release()
+
+    if cap is None or not hasattr(cap, 'isOpened') or not cap.isOpened():
         logger.error("Tidak ada kamera yang terdeteksi!")
         # Kirim frame error agar browser tahu kamera gagal
         err_frame = np.zeros((480, 640, 3), dtype=np.uint8)

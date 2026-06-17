@@ -65,9 +65,18 @@
 
       <!-- Info Badge — Pojok Kanan Bawah -->
       <div class="info-badge" id="infoBadge" style="pointer-events: auto;">
-        <div class="info-row" style="align-items: flex-end;">
+        <div class="info-row" style="align-items: flex-end; margin-bottom: 8px;">
           <label for="inputConsultationId" class="info-label">Consultation ID</label>
-          <input type="text" id="inputConsultationId" class="info-value" placeholder="Enter ID..." value="{{ consultation_id }}" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 4px 8px; border-radius: 6px; outline: none; width: 120px; text-align: right; margin-top: 4px;" />
+          <input type="text" id="inputConsultationId" class="info-value" placeholder="Enter ID..." value="{{ consultation_id }}" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 4px 8px; border-radius: 6px; outline: none; width: 120px; text-align: right;" />
+        </div>
+        <div class="info-row" style="align-items: flex-end;">
+          <label for="selectCameraIndex" class="info-label">Camera Source</label>
+          <select id="selectCameraIndex" class="info-value" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 4px 8px; border-radius: 6px; outline: none; width: 120px; text-align: right; cursor: pointer;">
+            <option value="auto" style="color: black;" selected>Auto-Detect</option>
+            <option value="0" style="color: black;">Camera 0</option>
+            <option value="1" style="color: black;">Camera 1</option>
+            <option value="2" style="color: black;">Camera 2</option>
+          </select>
         </div>
       </div>
 
@@ -113,6 +122,16 @@
       function getConsultationId() {
         return inputConsultationId.value.trim();
       }
+
+      // Ambil & simpan Camera Source pilihan ke/dari localStorage
+      const selectCameraIndex = document.getElementById('selectCameraIndex');
+      const savedCameraIndex = localStorage.getItem('selectedCameraIndex');
+      if (savedCameraIndex !== null) {
+        selectCameraIndex.value = savedCameraIndex;
+      }
+      selectCameraIndex.addEventListener('change', () => {
+        localStorage.setItem('selectedCameraIndex', selectCameraIndex.value);
+      });
 
       let streamStarted = false;
       let timerInterval;
@@ -206,7 +225,8 @@
         if (!streamStarted) {
           loadingOverlay.classList.add("visible");
 
-          video.src = "/process_video?consultation_id=" + encodeURIComponent(currentConsultationId);
+          const selectedCam = selectCameraIndex.value;
+          video.src = "/process_video?consultation_id=" + encodeURIComponent(currentConsultationId) + "&camera_index=" + encodeURIComponent(selectedCam);
           streamStarted = true;
 
           startBtn.disabled = true;
