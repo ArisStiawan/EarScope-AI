@@ -131,6 +131,13 @@
                     <div id="earVideoContainer" class="mt-2 p-4 border-2 border-dashed border-gray-300 rounded-lg text-center bg-gray-50 min-h-[120px] flex items-center justify-center">
                         <p class="text-sm text-gray-400">Examination video will appear automatically after the earscope device sends data.</p>
                     </div>
+                    <!-- RETAKE BUTTON -->
+                    <div id="retakeContainer" class="mt-3 flex justify-end hidden">
+                        <button type="button" onclick="retakeDiagnosis()" class="inline-flex items-center px-3 py-1.5 border border-red-300 shadow-sm text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                            <svg class="mr-2 h-4 w-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                            Retake Examination
+                        </button>
+                    </div>
                 </div>
 
                 <!-- AI Screening Result -->
@@ -176,9 +183,38 @@
     </div>
 
     <!-- Photo Lightbox Modal -->
-    <div id="photoLightbox" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center" style="display: none;" onclick="closeLightbox(event)">
-        <button onclick="closeLightbox()" class="absolute top-4 right-4 text-white text-3xl hover:text-gray-300 z-50">&times;</button>
+    <div id="photoLightbox" class="fixed inset-0 bg-black/80 z-[60] flex items-center justify-center" style="display: none;" onclick="closeLightbox(event)">
+        <button onclick="closeLightbox()" class="absolute top-4 right-4 text-white text-3xl hover:text-gray-300 z-[70]">&times;</button>
         <img id="lightboxImage" class="max-w-[90vw] max-h-[85vh] rounded-lg shadow-2xl" />
+    </div>
+
+    <!-- Retake Confirmation Modal -->
+    <div id="retakeConfirmModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm" style="display: none;">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 transform transition-all animate-fade-in mx-4">
+            <div class="flex items-center justify-center w-14 h-14 rounded-full bg-red-100 mx-auto mb-4">
+                <svg class="w-7 h-7 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            </div>
+            <h3 class="text-xl font-bold text-center text-gray-900 mb-2">Retake Examination?</h3>
+            <p class="text-sm text-center text-gray-500 mb-6">
+                Are you sure? This action will <strong class="text-gray-700">permanently delete</strong> the current video and AI results.
+            </p>
+            <div class="flex gap-3 justify-center">
+                <button type="button" onclick="closeRetakeModal()" class="w-1/2 px-4 py-2.5 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition">
+                    Cancel
+                </button>
+                <button type="button" onclick="executeRetake()" id="confirmRetakeBtn" class="w-1/2 px-4 py-2.5 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 transition flex items-center justify-center">
+                    Yes, Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toastNotification" class="fixed top-4 right-4 z-[70] transform transition-all duration-300 translate-x-full opacity-0">
+        <div class="bg-gray-900 text-white px-5 py-3.5 rounded-xl shadow-lg flex items-center gap-3">
+            <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <span id="toastMessage" class="text-sm font-medium"></span>
+        </div>
     </div>
 
     <script>
@@ -257,6 +293,9 @@
                 .addClass('bg-green-100 text-green-800')
                 .html('<span class="w-2 h-2 rounded-full bg-green-500 inline-block"></span> Data received from earscope');
 
+            // Show retake button
+            $('#retakeContainer').removeClass('hidden');
+
             // --- Video processed ---
             if (data.processed_video_url) {
                 $('#earVideoContainer').html(
@@ -281,6 +320,7 @@
 
             section.style.display = 'block';
             countEl.textContent = '(' + photos.length + ' photos)';
+            $('#retakeContainer').removeClass('hidden');
 
             // Only add new photos
             photos.forEach(function(photo) {
@@ -346,6 +386,7 @@
             $('#earVideoContainer').html('<p class="text-sm text-gray-400">Examination video will appear automatically after the earscope device sends data.</p>');
             $('#aiResultPlaceholder').removeClass('hidden');
             $('#aiResultText').addClass('hidden').text('');
+            $('#retakeContainer').addClass('hidden');
 
             // Fetch consultation details
             $.ajax({
@@ -388,6 +429,62 @@
             document.getElementById('diagnosisConsultationId').value = '';
             currentConsultationId = '';
             currentPatientName = '';
+        }
+
+        function retakeDiagnosis() {
+            $('#retakeConfirmModal').fadeIn(200).css('display', 'flex');
+        }
+
+        function closeRetakeModal() {
+            $('#retakeConfirmModal').fadeOut(200);
+        }
+
+        function showToast(message) {
+            $('#toastMessage').text(message);
+            const toast = $('#toastNotification');
+            toast.removeClass('translate-x-full opacity-0').addClass('translate-x-0 opacity-100');
+            setTimeout(() => {
+                toast.removeClass('translate-x-0 opacity-100').addClass('translate-x-full opacity-0');
+            }, 3000);
+        }
+
+        function executeRetake() {
+            const btn = $('#confirmRetakeBtn');
+            const originalText = btn.html();
+            btn.prop('disabled', true).html('<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Deleting...');
+
+            $.ajax({
+                url: '/doctor/consultation/' + currentConsultationId + '/retake',
+                type: 'DELETE',
+                success: function(res) {
+                    btn.prop('disabled', false).html(originalText);
+                    closeRetakeModal();
+                    $('#retakeContainer').addClass('hidden');
+                    
+                    // Reset earscope display
+                    earscopeLoaded = false;
+                    $('#pollingBadge')
+                        .removeClass('bg-green-100 text-green-800')
+                        .addClass('bg-yellow-100 text-yellow-800')
+                        .html('<span class="animate-pulse w-2 h-2 rounded-full bg-yellow-500 inline-block"></span> Waiting for earscope data...');
+                    $('#earVideoContainer').html('<p class="text-sm text-gray-400">Examination video will appear automatically after the earscope device sends data.</p>');
+                    $('#aiResultPlaceholder').removeClass('hidden');
+                    $('#aiResultText').addClass('hidden').text('');
+                    $('#diagnosis_result').val('');
+                    
+                    // Reset photo gallery
+                    knownPhotoIds.clear();
+                    $('#photoGallery').html('');
+                    $('#photoGallerySection').hide();
+                    
+                    showToast('Data reset successfully. You can now retake.');
+                },
+                error: function(xhr) {
+                    btn.prop('disabled', false).html(originalText);
+                    closeRetakeModal();
+                    alert('Failed to delete old diagnosis: ' + (xhr.responseJSON?.error || 'Unknown error'));
+                }
+            });
         }
 
         // CSRF token untuk semua AJAX
