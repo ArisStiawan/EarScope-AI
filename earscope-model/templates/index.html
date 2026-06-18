@@ -19,9 +19,7 @@
         navigator.serviceWorker
           .register("/static/service-worker.js")
           .then((reg) => console.log("Service Worker registered!", reg))
-          .catch((err) =>
-            console.log("Service Worker registration failed!", err)
-          );
+          .catch((err) => console.log("Service Worker registration failed!", err));
       }
     </script>
 
@@ -31,14 +29,14 @@
   </head>
   <body>
     <div class="camera-container" id="cameraFrame">
-      <!-- Video stream -->
+      <!-- Video stream (auto-preview on load) -->
       <img id="video" />
 
       <!-- Loading Overlay -->
-      <div id="loadingOverlay" class="loading-overlay">
+      <div id="loadingOverlay" class="loading-overlay visible">
         <div class="loading-content">
           <div class="spinner"></div>
-          <p>Membuka kamera...</p>
+          <p>Menghubungkan ke kamera...</p>
         </div>
       </div>
 
@@ -49,6 +47,12 @@
       <div id="timer" class="timer-badge">
         <i class="fas fa-circle recording-dot"></i>
         <span id="timerText">00:00</span>
+      </div>
+
+      <!-- Preview Badge -->
+      <div id="previewBadge" class="preview-badge">
+        <i class="fas fa-eye"></i>
+        Preview
       </div>
 
       <!-- Pesan No Internet -->
@@ -67,15 +71,19 @@
       <div class="info-badge" id="infoBadge" style="pointer-events: auto;">
         <div class="info-row" style="align-items: flex-end; margin-bottom: 8px;">
           <label for="inputConsultationId" class="info-label">Consultation ID</label>
-          <input type="text" id="inputConsultationId" class="info-value" placeholder="Enter ID..." value="{{ consultation_id }}" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 4px 8px; border-radius: 6px; outline: none; width: 120px; text-align: right;" />
+          <input type="text" id="inputConsultationId" class="info-value"
+            placeholder="Enter ID..."
+            value="{{ consultation_id }}"
+            style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 4px 8px; border-radius: 6px; outline: none; width: 120px; text-align: right;" />
         </div>
         <div class="info-row" style="align-items: flex-end;">
           <label for="selectCameraIndex" class="info-label">Camera Source</label>
-          <select id="selectCameraIndex" class="info-value" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 4px 8px; border-radius: 6px; outline: none; width: 120px; text-align: right; cursor: pointer;">
-            <option value="auto" style="color: black;" selected>Auto-Detect</option>
-            <option value="0" style="color: black;">Camera 0</option>
-            <option value="1" style="color: black;">Camera 1</option>
-            <option value="2" style="color: black;">Camera 2</option>
+          <select id="selectCameraIndex" class="info-value"
+            style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 4px 8px; border-radius: 6px; outline: none; width: 120px; text-align: right; cursor: pointer;">
+            <option value="auto"  style="color: black;" selected>Auto-Detect</option>
+            <option value="0"     style="color: black;">Camera 0</option>
+            <option value="1"     style="color: black;">Camera 1</option>
+            <option value="2"     style="color: black;">Camera 2</option>
           </select>
         </div>
       </div>
@@ -98,22 +106,22 @@
 
     <!-- Script utama -->
     <script>
-      const video = document.getElementById("video");
-      const startBtn = document.getElementById("startBtn");
-      const stopBtn = document.getElementById("stopBtn");
-      const captureBtn = document.getElementById("captureBtn");
-      const noInternet = document.getElementById("noInternet");
-      const timer = document.getElementById("timer");
-      const timerText = document.getElementById("timerText");
-      const loadingOverlay = document.getElementById("loadingOverlay");
-      const flashOverlay = document.getElementById("flashOverlay");
-      const captureToast = document.getElementById("captureToast");
+      const video           = document.getElementById("video");
+      const startBtn        = document.getElementById("startBtn");
+      const stopBtn         = document.getElementById("stopBtn");
+      const captureBtn      = document.getElementById("captureBtn");
+      const noInternet      = document.getElementById("noInternet");
+      const timer           = document.getElementById("timer");
+      const timerText       = document.getElementById("timerText");
+      const loadingOverlay  = document.getElementById("loadingOverlay");
+      const flashOverlay    = document.getElementById("flashOverlay");
+      const captureToast    = document.getElementById("captureToast");
       const captureToastText = document.getElementById("captureToastText");
+      const previewBadge    = document.getElementById("previewBadge");
 
-      // Ambil consultation_id dari URL parameter (dikirim oleh Laravel iframe)
-      const urlParams = new URLSearchParams(window.location.search);
+      // Ambil consultation_id dari URL parameter
+      const urlParams         = new URLSearchParams(window.location.search);
       const urlConsultationId = urlParams.get('consultation_id') || '';
-      
       const inputConsultationId = document.getElementById('inputConsultationId');
       if (urlConsultationId) {
         inputConsultationId.value = urlConsultationId;
@@ -123,21 +131,53 @@
         return inputConsultationId.value.trim();
       }
 
-      // Ambil & simpan Camera Source pilihan ke/dari localStorage
+      // Camera Source — simpan ke localStorage
       const selectCameraIndex = document.getElementById('selectCameraIndex');
-      const savedCameraIndex = localStorage.getItem('selectedCameraIndex');
+      const savedCameraIndex  = localStorage.getItem('selectedCameraIndex');
       if (savedCameraIndex !== null) {
         selectCameraIndex.value = savedCameraIndex;
       }
       selectCameraIndex.addEventListener('change', () => {
         localStorage.setItem('selectedCameraIndex', selectCameraIndex.value);
+        // Restart preview with new camera
+        startPreview();
       });
 
-      let streamStarted = false;
+      let isRecording  = false;
       let timerInterval;
-      let seconds = 0;
-      let isCapturing = false;
+      let seconds      = 0;
+      let isCapturing  = false;
 
+      // ============================================================
+      // PREVIEW — Auto-start on page load
+      // ============================================================
+      function startPreview() {
+        const camIdx = selectCameraIndex.value;
+        loadingOverlay.classList.add("visible");
+        previewBadge.classList.remove("visible");
+
+        // Set stream URL — camera worker starts on Flask side
+        const src = "/preview?camera_index=" + encodeURIComponent(camIdx);
+        video.src = src;
+
+        video.onload = () => {
+          loadingOverlay.classList.remove("visible");
+          previewBadge.classList.add("visible");
+        };
+
+        video.onerror = () => {
+          loadingOverlay.classList.remove("visible");
+        };
+      }
+
+      // Start preview immediately when page loads
+      window.addEventListener('DOMContentLoaded', () => {
+        startPreview();
+      });
+
+      // ============================================================
+      // TIMER
+      // ============================================================
       function formatTime(sec) {
         const minutes = Math.floor(sec / 60);
         const s = sec % 60;
@@ -148,11 +188,9 @@
         timer.classList.add("visible");
         timerText.innerText = "00:00";
         seconds = 0;
-
         timerInterval = setInterval(() => {
           seconds++;
           timerText.innerText = formatTime(seconds);
-
           if (seconds >= 20) {
             autoStop();
           }
@@ -165,21 +203,37 @@
         timer.classList.remove("visible");
       }
 
+      // ============================================================
+      // TOAST & FLASH
+      // ============================================================
       function showCaptureToast(message, isError = false) {
         captureToastText.textContent = message;
         captureToast.className = 'capture-toast visible' + (isError ? ' error' : '');
-        setTimeout(() => {
-          captureToast.classList.remove("visible");
-        }, 3000);
+        setTimeout(() => captureToast.classList.remove("visible"), 3000);
       }
 
       function triggerFlash() {
         flashOverlay.classList.add("flash");
-        setTimeout(() => {
-          flashOverlay.classList.remove("flash");
-        }, 300);
+        setTimeout(() => flashOverlay.classList.remove("flash"), 300);
       }
 
+      // ============================================================
+      // INTERNET CHECK
+      // ============================================================
+      async function checkInternet() {
+        try {
+          const response = await fetch("/health", { method: "GET" });
+          const connected = response.ok;
+          noInternet.classList.toggle("visible", !connected);
+        } catch (e) {
+          noInternet.classList.add("visible");
+        }
+      }
+      setInterval(checkInternet, 5000);
+
+      // ============================================================
+      // AUTO STOP (after 20 sec)
+      // ============================================================
       async function autoStop() {
         stopTimer();
         await fetch("/stop_recording", {
@@ -188,58 +242,51 @@
           body: JSON.stringify({ consultation_id: getConsultationId() }),
         });
 
-        stopBtn.disabled = true;
-        captureBtn.disabled = true;
-        startBtn.disabled = false;
-        streamStarted = false;
+        isRecording          = false;
+        stopBtn.disabled     = true;
+        captureBtn.disabled  = true;
+        startBtn.disabled    = false;
+        previewBadge.classList.add("visible");
 
-        setTimeout(() => location.reload(), 500);
+        // Stay on preview — no reload needed
       }
 
-      async function checkInternet() {
-        try {
-          const response = await fetch("/health", { method: "GET" });
-          const connected = response.ok;
-
-          noInternet.classList.toggle("visible", !connected);
-
-          if (connected && streamStarted && !timer.classList.contains("visible")) {
-            startTimer();
-          }
-        } catch (e) {
-          noInternet.classList.add("visible");
-          stopTimer();
-        }
-      }
-
-      setInterval(checkInternet, 5000);
-
-      // === START ===
-      startBtn.addEventListener("click", () => {
+      // ============================================================
+      // START RECORDING
+      // ============================================================
+      startBtn.addEventListener("click", async () => {
         const currentConsultationId = getConsultationId();
         if (!currentConsultationId) {
           alert("Please enter a Consultation ID.");
           return;
         }
 
-        if (!streamStarted) {
-          loadingOverlay.classList.add("visible");
+        try {
+          const res  = await fetch("/start_recording", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ consultation_id: currentConsultationId }),
+          });
+          const data = await res.json();
 
-          const selectedCam = selectCameraIndex.value;
-          video.src = "/process_video?consultation_id=" + encodeURIComponent(currentConsultationId) + "&camera_index=" + encodeURIComponent(selectedCam);
-          streamStarted = true;
-
-          startBtn.disabled = true;
-          stopBtn.disabled = false;
-          captureBtn.disabled = false;
-
-          video.onload = () => {
-            loadingOverlay.classList.remove("visible");
-          };
+          if (data.status === 'success') {
+            isRecording = true;
+            startTimer();
+            startBtn.disabled    = true;
+            stopBtn.disabled     = false;
+            captureBtn.disabled  = false;
+            previewBadge.classList.remove("visible");
+          } else {
+            alert(data.message || "Gagal memulai rekaman. Pastikan kamera sudah aktif.");
+          }
+        } catch (err) {
+          alert("Error: " + err.message);
         }
       });
 
-      // === STOP ===
+      // ============================================================
+      // STOP RECORDING
+      // ============================================================
       stopBtn.addEventListener("click", async () => {
         stopTimer();
 
@@ -249,30 +296,31 @@
           body: JSON.stringify({ consultation_id: getConsultationId() }),
         });
 
-        stopBtn.disabled = true;
-        captureBtn.disabled = true;
-        startBtn.disabled = false;
-        streamStarted = false;
+        isRecording          = false;
+        stopBtn.disabled     = true;
+        captureBtn.disabled  = true;
+        startBtn.disabled    = false;
+        previewBadge.classList.add("visible");
 
-        setTimeout(() => location.reload(), 500);
+        showCaptureToast("Rekaman selesai. Mengirim data ke server...");
       });
 
-      // === CAPTURE FOTO ===
+      // ============================================================
+      // CAPTURE FOTO
+      // ============================================================
       captureBtn.addEventListener("click", async () => {
         if (isCapturing) return;
-        isCapturing = true;
-        captureBtn.disabled = true;
+        isCapturing          = true;
+        captureBtn.disabled  = true;
         captureBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
 
         try {
           triggerFlash();
-
           const response = await fetch("/capture_photo", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ consultation_id: getConsultationId() }),
           });
-
           const data = await response.json();
 
           if (data.status === 'success') {
@@ -286,8 +334,8 @@
           showCaptureToast("Gagal mengambil foto: " + err.message, true);
         } finally {
           isCapturing = false;
-          if (streamStarted) {
-            captureBtn.disabled = false;
+          if (isRecording) {
+            captureBtn.disabled  = false;
           }
           captureBtn.innerHTML = '<i class="fas fa-camera"></i> Ambil Foto';
         }

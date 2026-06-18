@@ -348,3 +348,35 @@ body {
 .show {
   display: block;
 }
+
+/* ---- Preview Badge ---- */
+.preview-badge {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: rgba(255, 255, 255, 0.75);
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  display: none;
+  align-items: center;
+  gap: 6px;
+  z-index: 50;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.preview-badge.visible {
+  display: flex;
+}
+
+.preview-badge i {
+  font-size: 11px;
+  color: #a5f3fc;
+}
+
