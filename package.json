@@ -1,0 +1,8 @@
+{
+  "name": "earscope-ai",
+  "version": "1.0.0",
+  "description": "Menjalankan semua service sekaligus",
+  "scripts": {
+    "dev": "npx concurrently -k -c \"blue,green,yellow\" \"cd earscope-model && call venv\\Scripts\\activate && python app.py\" \"cd web && php artisan serve\" \"cd web && npm run dev\" --names=\"Flask,Laravel,Vite\""
+  }
+}
