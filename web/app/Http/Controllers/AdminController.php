@@ -29,8 +29,10 @@ class AdminController extends Controller
         // Get monthly consultation statistics (6 months)
         $consultationStats = $this->getMonthlyConsultationStats();
 
-        // Get activity logs
-        $activityLogs = $this->getActivityLogs(50);
+        // Get activity logs (paginated)
+        $activityLogs = ActivityLog::with('user')
+            ->latest()
+            ->paginate(15);
 
         return view('admin.dashboard', [
             'stats' => $stats,
@@ -94,29 +96,6 @@ class AdminController extends Controller
             'labels' => $months,
             'data' => $data,
         ];
-    }
-
-    /**
-     * Get activity logs with user information
-     */
-    private function getActivityLogs($limit = 50): array
-    {
-        $logs = ActivityLog::with('user')
-            ->latest()
-            ->limit($limit)
-            ->get();
-
-        return $logs->map(function ($log) {
-            return [
-                'id' => $log->id,
-                'timestamp' => $log->created_at,
-                'user_name' => $log->user?->username ?? 'System',
-                'activity_type' => $log->activity_type,
-                'description' => $log->description,
-                'ip_address' => $log->ip_address,
-                'data' => $log->data,
-            ];
-        })->toArray();
     }
 
     /**

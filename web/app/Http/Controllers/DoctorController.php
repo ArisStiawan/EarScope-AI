@@ -239,7 +239,7 @@ class DoctorController extends Controller
                   ->orderBy('created_at', 'desc');
         }
 
-        $consultations = $query->get();
+        $consultations = $query->paginate(10)->appends(['status' => $status]);
 
         return view('doctor.consultations', compact('consultations', 'status'));
     }

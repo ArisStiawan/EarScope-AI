@@ -124,7 +124,7 @@
                                     @foreach ($consultations as $i => $consultation)
                                         <tr class="hover:bg-gray-50 transition">
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {{ $i + 1 }}</td>
+                                                {{ $consultations->firstItem() + $i }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <div class="flex items-center gap-2">
                                                     <div
@@ -193,6 +193,11 @@
                                     @endforeach
                                 </tbody>
                             </table>
+                        </div>
+
+                        <!-- Pagination Links -->
+                        <div class="mt-6">
+                            {{ $consultations->links() }}
                         </div>
                     @endif
 

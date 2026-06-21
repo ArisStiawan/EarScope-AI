@@ -36,6 +36,7 @@ camera_cap         = None
 camera_lock        = threading.Lock()
 camera_thread_running = False
 camera_thread_lock = threading.Lock()
+current_camera_index = None
 
 # Recording state
 is_recording          = False
@@ -243,14 +244,31 @@ def camera_worker(camera_index=None):
 
 
 def ensure_camera_started(camera_index=None):
-    """Start camera worker thread if not already running."""
-    global camera_thread_running
+    """Start camera worker thread if not already running, or restart if index changed."""
+    global camera_thread_running, current_camera_index
+    
+    need_restart = False
+    with camera_thread_lock:
+        if camera_thread_running:
+            if camera_index is not None and str(camera_index) != str(current_camera_index):
+                need_restart = True
+                camera_thread_running = False
+
+    if need_restart:
+        logger.info(f"Menghentikan kamera saat ini ({current_camera_index}) untuk ganti ke {camera_index}...")
+        while True:
+            with camera_thread_lock:
+                if not camera_thread_running:
+                    break
+            time.sleep(0.1)
+
     with camera_thread_lock:
         if not camera_thread_running:
+            current_camera_index = camera_index
             camera_thread_running = True
             t = threading.Thread(target=camera_worker, args=(camera_index,), daemon=True)
             t.start()
-            logger.info("Camera worker thread dimulai.")
+            logger.info(f"Camera worker thread dimulai dengan index {camera_index}.")
 
 
 def generate_preview():

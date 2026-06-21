@@ -26,7 +26,7 @@ class DiagnosisController extends Controller
             ->with('patient')
             ->orderBy('scheduled_date', 'asc')
             ->orderBy('scheduled_time', 'asc')
-            ->get();
+            ->paginate(10);
 
         return view('doctor.diagnoses', compact('consultations'));
     }

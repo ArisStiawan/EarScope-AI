@@ -116,7 +116,7 @@
                     <p class="text-xs text-slate-400 mt-0.5">Real-time audit log of admin, doctor, and patient actions</p>
                 </div>
 
-                @if(empty($activityLogs))
+                @if($activityLogs->isEmpty())
                     <div class="text-center py-12 px-6">
                         <p class="text-slate-400 text-sm">No system activity recorded.</p>
                     </div>
@@ -135,30 +135,35 @@
                                 @foreach($activityLogs as $log)
                                     <tr class="hover:bg-slate-50/40 transition-colors duration-250">
                                         <td class="px-6 py-4 text-slate-500 font-medium">
-                                            {{ $log['timestamp']->format('d M Y H:i') }} WIB
+                                            {{ $log->created_at->format('d M Y H:i') }} WIB
                                         </td>
                                         <td class="px-6 py-4">
                                             <div class="flex items-center gap-2">
                                                 <div class="h-6 w-6 rounded-lg bg-slate-100 flex items-center justify-center shrink-0 border border-slate-200/50">
                                                     <span class="text-slate-600 text-[10px] font-bold">
-                                                        {{ strtoupper(substr($log['user_name'], 0, 1)) }}
+                                                        {{ strtoupper(substr($log->user?->username ?? 'S', 0, 1)) }}
                                                     </span>
                                                 </div>
-                                                <span class="font-bold text-slate-700">{{ $log['user_name'] }}</span>
+                                                <span class="font-bold text-slate-700">{{ $log->user?->username ?? 'System' }}</span>
                                             </div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <span class="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md border bg-slate-50 text-slate-600 border-slate-200/50">
-                                                {{ $log['activity_type'] }}
+                                                {{ $log->activity_type }}
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 text-slate-600 font-medium">
-                                            {{ $log['description'] }}
+                                            {{ $log->description }}
                                         </td>
                                     </tr>
                                 @endforeach
                             </tbody>
                         </table>
+                    </div>
+
+                    <!-- Pagination Links -->
+                    <div class="p-6 border-t border-slate-100">
+                        {{ $activityLogs->links() }}
                     </div>
                 @endif
             </div>

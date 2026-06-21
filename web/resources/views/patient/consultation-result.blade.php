@@ -39,7 +39,7 @@
                                 <tbody class="bg-white divide-y divide-gray-200">
                                     @foreach($consultations as $i => $consultation)
                                         <tr class="hover:bg-gray-50 transition">
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $i + 1 }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $consultations->firstItem() + $i }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                                 dr. {{ $consultation->doctor->name ?? '-' }}
                                             </td>
@@ -66,6 +66,11 @@
                                     @endforeach
                                 </tbody>
                             </table>
+                        </div>
+
+                        <!-- Pagination Links -->
+                        <div class="mt-6">
+                            {{ $consultations->links() }}
                         </div>
                     @endif
                 </div>

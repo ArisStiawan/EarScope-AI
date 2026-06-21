@@ -30,7 +30,7 @@ class PatientController extends Controller
             ->orderByRaw("CASE WHEN status = 'scheduled' THEN 0 ELSE 1 END")
             ->orderBy('scheduled_date', 'asc')
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(10);
 
         return view('patient.dashboard', compact('consultations', 'totalRequests', 'totalDone', 'nextScheduled'));
     }
@@ -71,7 +71,7 @@ class PatientController extends Controller
             ->with(['doctor', 'diagnosis'])
             ->where('status', 'done')
             ->orderBy('scheduled_date', 'asc')
-            ->get();
+            ->paginate(10);
 
         return view('patient.consultation-result', compact('consultations'));
     }
