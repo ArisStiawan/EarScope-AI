@@ -3,8 +3,13 @@
 @section('admin-content')
 <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-fade-in-up">
     <div>
+<<<<<<< HEAD
         <h1 class="text-2xl font-bold text-slate-800">Doctor Data Management</h1>
         <p class="text-xs text-slate-400 font-medium mt-1">Manage doctor data, usernames, license numbers, and specializations</p>
+=======
+        <h1 class="text-2xl font-bold text-slate-800">Manajemen Data Dokter</h1>
+        <p class="text-xs text-slate-400 font-medium mt-1">Kelola data dokter, username, dan nomor registrasi lisensi sistem</p>
+>>>>>>> b339378d2604097b8b045d1e0843952bead91c98
     </div>
     
     <a href="{{ route('admin.doctors.create') }}" 
@@ -24,18 +29,26 @@
                 <thead>
                     <tr class="bg-slate-50/75 border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
                         <th class="px-6 py-4">No</th>
+<<<<<<< HEAD
                         <th class="px-6 py-4">Doctor Name</th>
                         <th class="px-6 py-4">Account Username</th>
                         <th class="px-6 py-4">STR License Number</th>
                         <th class="px-6 py-4">Specialization</th>
                         <th class="px-6 py-4">Gender</th>
                         <th class="px-6 py-4">Action</th>
+=======
+                        <th class="px-6 py-4">Nama Dokter</th>
+                        <th class="px-6 py-4">Username Akun</th>
+                        <th class="px-6 py-4">Nomor Lisensi STR</th>
+                        <th class="px-6 py-4">Jenis Kelamin</th>
+                        <th class="px-6 py-4">Aksi</th>
+>>>>>>> b339378d2604097b8b045d1e0843952bead91c98
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 text-sm">
                     @foreach($doctors as $key => $doctor)
                         <tr class="hover:bg-slate-50/40 transition-colors duration-250">
-                            <td class="px-6 py-4 text-slate-400 font-medium">{{ $key + 1 }}</td>
+                            <td class="px-6 py-4 text-slate-400 font-medium">{{ ($doctors->currentPage() - 1) * $doctors->perPage() + $key + 1 }}</td>
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-3">
                                     <div class="h-9 w-9 rounded-xl bg-teal-50 flex items-center justify-center shrink-0 border border-teal-100/30">
@@ -53,9 +66,6 @@
                                 <span class="px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-md border bg-teal-50 text-teal-700 border-teal-200/50">
                                     {{ $doctor->license_number }}
                                 </span>
-                            </td>
-                            <td class="px-6 py-4 text-slate-600 font-semibold">
-                                {{ $doctor->specialization }}
                             </td>
                             <td class="px-6 py-4 text-slate-500 font-medium">
                                 {{ $doctor->gender === 'male' ? 'Laki-laki' : 'Perempuan' }}
@@ -82,6 +92,7 @@
                     @endforeach
                 </tbody>
             </table>
+            <x-custom-pagination :paginator="$doctors" :perPage="$perPage" />
         @else
             <div class="px-6 py-16 text-center">
                 <div class="w-14 h-14 bg-slate-50 rounded-full flex items-center justify-center mx-auto text-slate-400 mb-3 animate-float">

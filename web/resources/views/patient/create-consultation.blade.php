@@ -73,7 +73,11 @@
                                     @foreach($doctors as $doctor)
                                         <option value="{{ $doctor->id }}"
                                             {{ old('doctor_id') == $doctor->id ? 'selected' : '' }}>
+<<<<<<< HEAD
                                             dr. {{ $doctor->name }} — {{ $doctor->specialization ?? 'General' }}
+=======
+                                            dr. {{ $doctor->name }}
+>>>>>>> b339378d2604097b8b045d1e0843952bead91c98
                                         </option>
                                     @endforeach
                                 </select>

@@ -52,7 +52,7 @@
             </div>
 
             <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-2">
-                <button type="button" id="scheduleSubmitBtn" onclick="submitSchedule()" class="w-full inline-flex justify-center items-center gap-2 rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:ml-3 sm:w-auto sm:text-sm">
+                <button type="button" id="scheduleSubmitBtn" onclick="submitSchedule()" class="w-full inline-flex justify-center items-center gap-2 rounded-md border border-transparent px-4 py-2 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white transition shadow-md shadow-teal-500/20 sm:ml-3 sm:w-auto sm:text-sm">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                     <span id="scheduleSubmitLabel">Approve &amp; Schedule</span>
                 </button>
@@ -76,11 +76,15 @@
         if (isApprove) {
             $('#scheduleModalTitle').text('Approve & Schedule Consultation');
             $('#scheduleSubmitLabel').text('Approve & Schedule');
-            $('#scheduleSubmitBtn').removeClass('bg-indigo-600 hover:bg-indigo-700').addClass('bg-green-600 hover:bg-green-700');
         } else {
+<<<<<<< HEAD
             $('#scheduleModalTitle').text('Reschedule Consultation');
             $('#scheduleSubmitLabel').text('Save Schedule');
             $('#scheduleSubmitBtn').removeClass('bg-green-600 hover:bg-green-700').addClass('bg-indigo-600 hover:bg-indigo-700');
+=======
+            $('#scheduleModalTitle').text('Ubah Jadwal Konsultasi');
+            $('#scheduleSubmitLabel').text('Simpan Jadwal');
+>>>>>>> b339378d2604097b8b045d1e0843952bead91c98
         }
 
         // Set minimum date to today

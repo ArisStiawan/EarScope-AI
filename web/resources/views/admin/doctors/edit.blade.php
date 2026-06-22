@@ -12,7 +12,11 @@
         'method' => 'PATCH',
         'edit' => true,
         'doctor' => $doctor,
+<<<<<<< HEAD
         'submit_label' => 'Update Doctor'
+=======
+        'submit_label' => 'Update Data Dokter'
+>>>>>>> b339378d2604097b8b045d1e0843952bead91c98
     ])
 </div>
 @endsection

@@ -124,7 +124,11 @@
                                     @foreach ($consultations as $i => $consultation)
                                         <tr class="hover:bg-gray-50 transition">
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+<<<<<<< HEAD
                                                 {{ $consultations->firstItem() + $i }}</td>
+=======
+                                                {{ ($consultations->currentPage() - 1) * $consultations->perPage() + $i + 1 }}</td>
+>>>>>>> b339378d2604097b8b045d1e0843952bead91c98
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <div class="flex items-center gap-2">
                                                     <div
@@ -193,6 +197,7 @@
                                     @endforeach
                                 </tbody>
                             </table>
+                            <x-custom-pagination :paginator="$consultations" :perPage="$perPage" />
                         </div>
 
                         <!-- Pagination Links -->
@@ -292,10 +297,6 @@
                                         <p class="mt-1 text-sm text-gray-900">${data.doctor.name}</p>
                                     </div>
                                     <div>
-                                        <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Specialization</p>
-                                        <p class="mt-1 text-sm text-gray-900">${data.doctor.specialization}</p>
-                                    </div>
-                                    <div class="col-span-2">
                                         <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Email</p>
                                         <p class="mt-1 text-sm text-gray-900">${data.doctor.email}</p>
                                     </div>
@@ -335,6 +336,20 @@
                                         ` : ''}
                                 </div>
                             </div>
+
+                            ${data.notes ? `
+                                <div class="border-t pt-4">
+                                    <div class="rounded-lg bg-teal-50 border border-teal-100 p-4">
+                                        <div class="flex items-center gap-2 mb-2">
+                                            <svg class="w-4 h-4 text-teal-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                            </svg>
+                                            <h4 class="text-xs font-bold text-teal-700 uppercase tracking-wider">Catatan Dokter</h4>
+                                        </div>
+                                        <p class="text-sm text-teal-900 leading-relaxed">${data.notes}</p>
+                                    </div>
+                                </div>
+                            ` : ''}
                         </div>
                     `;
                     $('#modalContent').html(content);

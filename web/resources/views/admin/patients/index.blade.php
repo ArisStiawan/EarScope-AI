@@ -7,7 +7,11 @@
         <p class="text-gray-600 mt-2">List of all patients registered in the system</p>
     </div>
     <span class="px-4 py-2 bg-green-100 text-green-800 rounded-full text-sm font-semibold">
+<<<<<<< HEAD
         Total: {{ $patients->count() }} Patients
+=======
+        Total: {{ $patients->total() }} Pasien
+>>>>>>> b339378d2604097b8b045d1e0843952bead91c98
     </span>
 </div>
 
@@ -26,7 +30,7 @@
                 <tbody class="divide-y divide-gray-200">
                     @foreach($patients as $key => $patient)
                         <tr class="hover:bg-gray-50 transition">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $key + 1 }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ ($patients->currentPage() - 1) * $patients->perPage() + $key + 1 }}</td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center gap-3">
                                     <div class="h-9 w-9 rounded-full bg-green-100 flex items-center justify-center">
@@ -47,6 +51,7 @@
                     @endforeach
                 </tbody>
             </table>
+            <x-custom-pagination :paginator="$patients" :perPage="$perPage" />
         @else
             <div class="px-6 py-12 text-center">
                 <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

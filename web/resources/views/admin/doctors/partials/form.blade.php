@@ -47,6 +47,7 @@
         @enderror
     </div>
 
+<<<<<<< HEAD
     <!-- Specialization -->
     <div>
         <label for="specialization" class="block text-sm font-medium text-gray-700">Specialization</label>
@@ -64,6 +65,8 @@
         @enderror
     </div>
 
+=======
+>>>>>>> b339378d2604097b8b045d1e0843952bead91c98
     <!-- Gender -->
     <div>
         <label class="block text-sm font-medium text-gray-700 mb-2">Gender</label>
@@ -84,8 +87,13 @@
 
     <!-- Buttons -->
     <div class="flex gap-3 pt-6">
+<<<<<<< HEAD
         <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">
             {{ $submit_label ?? 'Save' }}
+=======
+        <button type="submit" class="px-4 py-2 bg-gradient-to-r from-teal-600 to-emerald-600 text-white rounded-md transition hover:from-teal-700 hover:to-emerald-700">
+            {{ $submit_label ?? 'Simpan' }}
+>>>>>>> b339378d2604097b8b045d1e0843952bead91c98
         </button>
         <a href="{{ route('admin.doctors.index') }}" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition">
             Cancel

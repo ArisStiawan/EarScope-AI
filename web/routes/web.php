@@ -58,6 +58,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware(['role:doctor'])->group(function () {
         Route::get('/doctor/dashboard', [DoctorController::class, 'dashboard'])->name('doctor.dashboard');
         Route::get('/doctor/consultations', [DoctorController::class, 'consultations'])->name('doctor.consultations');
+        Route::get('/doctor/consultation-results', [DoctorController::class, 'consultationResults'])->name('doctor.consultation.results');
         Route::get('/doctor/diagnoses', [DiagnosisController::class, 'index'])->name('doctor.diagnoses');
         Route::post('/doctor/diagnoses', [DiagnosisController::class, 'store'])->name('doctor.diagnoses.store');
         Route::delete('/doctor/consultation/{id}/retake', [DiagnosisController::class, 'retake'])->name('doctor.diagnoses.retake');
@@ -67,6 +68,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/doctor/consultation/{id}/reject', [DoctorController::class, 'reject'])->name('consultation.reject');
         Route::post('/doctor/consultation/{id}/schedule', [DoctorController::class, 'schedule'])->name('consultation.schedule');
         Route::post('/doctor/consultation/{id}/verify', [DoctorController::class, 'verifyDiagnosis'])->name('consultation.verify');
+        Route::post('/doctor/consultation/{id}/save-notes', [DoctorController::class, 'saveNotes'])->name('consultation.save-notes');
 
         // Flask Earscope Control
         Route::post('/doctor/flask/start', [DoctorController::class, 'startFlask'])->name('doctor.flask.start');

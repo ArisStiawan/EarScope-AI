@@ -6,13 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class ConsultationRequest extends Model
 {
-        protected $fillable = [
+    protected $fillable = [
         'patient_id',
         'doctor_id',
         'complaint',
+        'notes',
         'status',
         'scheduled_date',
-        'scheduled_time'
+        'scheduled_time',
     ];
 
     public function patient()
