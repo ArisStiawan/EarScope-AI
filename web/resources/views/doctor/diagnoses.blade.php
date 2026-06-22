@@ -460,7 +460,7 @@
                     $('#detailPatientName').text(data.patient?.name || '-');
                     $('#detailPatientAge').text(data.patient?.age || '-');
                     $('#detailPatientGender').text(data.patient?.gender || '-');
-                    $('#detailPatientEmail').text(data.patient?.user?.email || '-');
+                    $('#detailPatientEmail').text(data.patient?.email || '-');
                     $('#detailComplaint').text(data.complaint || '-');
                     $('#detailScheduled').text(data.scheduled_date
                         ? new Date(data.scheduled_date).toLocaleDateString('id-ID', {year: 'numeric', month: 'long', day: 'numeric'})
