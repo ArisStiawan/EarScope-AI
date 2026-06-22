@@ -58,6 +58,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware(['role:doctor'])->group(function () {
         Route::get('/doctor/dashboard', [DoctorController::class, 'dashboard'])->name('doctor.dashboard');
         Route::get('/doctor/consultations', [DoctorController::class, 'consultations'])->name('doctor.consultations');
+        Route::get('/doctor/consultation-results', [DoctorController::class, 'consultationResults'])->name('doctor.consultation.results');
         Route::get('/doctor/diagnoses', [DiagnosisController::class, 'index'])->name('doctor.diagnoses');
         Route::post('/doctor/diagnoses', [DiagnosisController::class, 'store'])->name('doctor.diagnoses.store');
         Route::get('/doctor/patients-profile', [DoctorController::class, 'patientsProfile'])->name('doctor.patients-profile');

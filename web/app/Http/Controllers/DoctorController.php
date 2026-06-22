@@ -97,6 +97,24 @@ class DoctorController extends Controller
         ));
     }
 
+    public function consultationResults(Request $request)
+    {
+        $doctor = $this->getDoctor();
+
+        $perPage = $request->input('per_page', 10);
+        if (!in_array($perPage, [5, 10, 15])) {
+            $perPage = 10;
+        }
+
+        $consultations = ConsultationRequest::where('doctor_id', $doctor->id)
+            ->with(['patient.user', 'diagnosis'])
+            ->where('status', 'done')
+            ->orderBy('scheduled_date', 'desc')
+            ->paginate($perPage);
+
+        return view('doctor.consultation-result', compact('consultations', 'perPage'));
+    }
+
     public function approve($id)
     {
         $consultation = ConsultationRequest::findOrFail($id);

@@ -37,6 +37,9 @@
                         <x-nav-link href="/doctor/consultations" :active="request()->is('doctor/consultations*')" class="!text-white">
                             {{ __('Consultation Request') }}
                         </x-nav-link>
+                        <x-nav-link href="/doctor/consultation-results" :active="request()->is('doctor/consultation-results*')" class="!text-white">
+                            {{ __('Consultation Result') }}
+                        </x-nav-link>
                         <x-nav-link href="/doctor/diagnoses" :active="request()->is('doctor/diagnoses*')" class="!text-white">
                             {{ __('Diagnoses') }}
                         </x-nav-link>
@@ -117,6 +120,9 @@
             @if($role === 'doctor')
                 <x-responsive-nav-link href="/doctor/consultations" :active="request()->is('doctor/consultations*')" class="!text-white">
                     {{ __('Consultation Request') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link href="/doctor/consultation-results" :active="request()->is('doctor/consultation-results*')" class="!text-white">
+                    {{ __('Hasil Konsultasi') }}
                 </x-responsive-nav-link>
                 <x-responsive-nav-link href="/doctor/diagnoses" :active="request()->is('doctor/diagnoses*')" class="!text-white">
                     {{ __('Hasil Pemeriksaan') }}
