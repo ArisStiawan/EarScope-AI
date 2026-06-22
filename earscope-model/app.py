@@ -85,22 +85,25 @@ def check_internet(timeout=3):
     targets.append(('8.8.8.8', 53))
     for host, port in targets:
         try:
-            socket.setdefaulttimeout(timeout)
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(timeout)
             s.connect((host, port))
             s.close()
             return True
-        except socket.error:
+        except Exception:
             continue
     return False
 
 def network_monitor():
     global network_available
     while True:
-        connected = check_internet()
-        if connected != network_available:
-            network_available = connected
-            logger.info(f"Network status changed: {'Available' if connected else 'Not available'}")
+        try:
+            connected = check_internet()
+            if connected != network_available:
+                network_available = connected
+                logger.info(f"Network status changed: {'Available' if connected else 'Not available'}")
+        except Exception as e:
+            logger.error(f"Error in network_monitor: {e}")
         time.sleep(10)
 
 threading.Thread(target=network_monitor, daemon=True).start()
@@ -311,24 +314,25 @@ def process_and_send(frames, consultation_id):
     width, height = 1280, 720
 
     # --- Write raw video ---
-    raw_path  = os.path.join(folder, f"raw_{timestamp}.webm")
-    fourcc    = cv2.VideoWriter_fourcc(*'VP80')
+    raw_path   = os.path.join(folder, f"raw_{timestamp}.mp4")
+    fourcc     = cv2.VideoWriter_fourcc(*'mp4v')
     raw_writer = cv2.VideoWriter(raw_path, fourcc, 20.0, (width, height))
     if not raw_writer.isOpened():
-        logger.warning("VP80 gagal, fallback ke mp4v")
-        raw_path   = os.path.join(folder, f"raw_{timestamp}.mp4")
-        fourcc     = cv2.VideoWriter_fourcc(*'mp4v')
-        raw_writer = cv2.VideoWriter(raw_path, fourcc, 20.0, (width, height))
+        logger.error("Gagal membuka VideoWriter untuk raw video! Cek instalasi OpenCV/FFMPEG.")
+        return
 
     for frame in frames:
         raw_writer.write(frame)
     raw_writer.release()
+    logger.info(f"Raw video disimpan: {raw_path}")
 
     # --- Run YOLO and write bbox video ---
-    raw_ext    = os.path.splitext(raw_path)[1]
-    bbox_path  = os.path.join(folder, f"bbox_{timestamp}{raw_ext}")
-    bbox_fourcc = cv2.VideoWriter_fourcc(*'VP80') if raw_ext == '.webm' else cv2.VideoWriter_fourcc(*'mp4v')
+    bbox_path   = os.path.join(folder, f"bbox_{timestamp}.mp4")
+    bbox_fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     bbox_writer = cv2.VideoWriter(bbox_path, bbox_fourcc, 20.0, (width, height))
+    if not bbox_writer.isOpened():
+        logger.error("Gagal membuka VideoWriter untuk bbox video!")
+        return
 
     detected_classes = []
     for i, frame in enumerate(frames):
@@ -361,10 +365,14 @@ def process_and_send(frames, consultation_id):
     logger.info("Data rekaman diantrekan untuk pengiriman ke API.")
 
 
-# Thread worker untuk kirim data ke API secara async
+# Thread worker untuk kirim data ke API secara async (dengan retry otomatis)
+MAX_RETRY = 5
+RETRY_DELAY = 30  # detik
+
 def api_sender_worker():
     while True:
         record_data = send_queue.get()
+        retry_count = record_data.get('_retry', 0)
         try:
             success = send_to_api(
                 record_data["raw_path"],
@@ -372,9 +380,18 @@ def api_sender_worker():
                 record_data["diagnosis"],
                 record_data.get("consultation_id", "")
             )
-            logger.info(f"Send to API selesai, success={success}")
+            if success:
+                logger.info(f"Send to API selesai, success=True")
+            else:
+                raise Exception("API mengembalikan response gagal")
         except Exception as e:
-            logger.error(f"Exception in api_sender_worker: {e}")
+            logger.error(f"Exception in api_sender_worker (percobaan ke-{retry_count+1}): {e}")
+            if retry_count < MAX_RETRY:
+                record_data['_retry'] = retry_count + 1
+                logger.info(f"Akan coba ulang dalam {RETRY_DELAY} detik... ({record_data['_retry']}/{MAX_RETRY})")
+                threading.Timer(RETRY_DELAY, send_queue.put, args=[record_data]).start()
+            else:
+                logger.error(f"Gagal kirim setelah {MAX_RETRY} percobaan. Data tidak terkirim: {record_data}")
         send_queue.task_done()
 
 threading.Thread(target=api_sender_worker, daemon=True).start()
@@ -449,7 +466,7 @@ def stop_recording():
     global is_recording, recorded_frames
 
     if not network_available:
-        return jsonify({'status': 'error', 'message': 'Tidak ada koneksi internet.'}), 503
+        logger.warning("[stop_recording] Jaringan tidak tersedia, data akan dikirim saat jaringan pulih.")
 
     body            = request.get_json(silent=True) or {}
     consultation_id = body.get('consultation_id', recording_data.get('consultation_id', ''))
@@ -561,7 +578,7 @@ def send_to_api(raw_path, bbox_path, diagnosis, consultation_id=''):
                 'hasil_diagnosis': diagnosis,
                 'consultation_id': consultation_id
             }
-            response = requests.post(url, files=files, data=data)
+            response = requests.post(url, files=files, data=data, timeout=60)
 
         logger.info(f"API Status: {response.status_code}")
         try:
