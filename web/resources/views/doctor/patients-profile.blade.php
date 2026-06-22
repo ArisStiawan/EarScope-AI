@@ -49,6 +49,7 @@
                             </tbody>
 
                         </table>
+                        <x-custom-pagination :paginator="$patients" :perPage="$perPage" />
                     </div>
 
                 @endif

@@ -11,12 +11,17 @@ use Illuminate\Support\Facades\Auth;
 
 class DiagnosisController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $doctor = Auth::user()->doctor;
 
         if (!$doctor) {
             abort(403, 'Doctor not found');
+        }
+
+        $perPage = $request->input('per_page', 10);
+        if (!in_array($perPage, [5, 10, 15])) {
+            $perPage = 10;
         }
 
         $consultations = ConsultationRequest::where('doctor_id', $doctor->id)
@@ -25,9 +30,9 @@ class DiagnosisController extends Controller
             ->with('patient')
             ->orderBy('scheduled_date', 'asc')
             ->orderBy('scheduled_time', 'asc')
-            ->get();
+            ->paginate($perPage);
 
-        return view('doctor.diagnoses', compact('consultations'));
+        return view('doctor.diagnoses', compact('consultations', 'perPage'));
     }
 
     public function store(Request $request)

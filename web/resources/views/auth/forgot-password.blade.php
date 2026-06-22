@@ -19,6 +19,10 @@
         </style>
     </head>
     <body class="bg-gradient-to-br from-slate-100 via-slate-50 to-teal-50/30 text-slate-800 flex items-center justify-center min-h-screen p-3 overflow-hidden relative">
+        @php
+            $showPasswordForm = session('show_password_form') || old('token') || $errors->has('password');
+            // We use old('token') or check errors so that when validation fails, the password form doesn't close.
+        @endphp
         <div class="absolute top-10 left-10 w-72 h-72 bg-teal-200/20 rounded-full blur-3xl animate-float"></div>
         <div class="absolute bottom-10 right-10 w-96 h-96 bg-emerald-200/20 rounded-full blur-3xl animate-float" style="animation-delay: 2s;"></div>
 
@@ -32,14 +36,14 @@
                         </div>
                     </div>
                     <h1 class="text-2xl font-extrabold text-white tracking-tight mb-1 relative z-10">
-                        @if(session('show_password_form'))
+                        @if($showPasswordForm)
                             Buat Password Baru
                         @else
                             Lupa Password
                         @endif
                     </h1>
                     <p class="text-teal-100 text-xs font-medium relative z-10">
-                        @if(session('show_password_form'))
+                        @if($showPasswordForm)
                             Masukkan password baru untuk mengamankan akun Anda.
                         @else
                             Verifikasi username dan email untuk membuat password baru.
@@ -57,25 +61,25 @@
                     <form method="POST" action="{{ route('password.email') }}" class="space-y-4">
                         @csrf
 
-                        @if(session('show_password_form'))
+                        @if($showPasswordForm)
                             <input type="hidden" name="token" value="{{ session('reset_token') }}">
                         @endif
 
                         <div>
                             <label for="username" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Username</label>
-                            <input id="username" name="username" type="text" value="{{ old('username') }}" required autofocus @if(session('show_password_form')) readonly @endif
-                                class="w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 transition-all duration-200 text-sm font-medium @if(session('show_password_form')) bg-slate-100 opacity-75 cursor-not-allowed @endif" />
+                            <input id="username" name="username" type="text" value="{{ old('username') }}" required autofocus @if($showPasswordForm) readonly @endif
+                                class="w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 transition-all duration-200 text-sm font-medium @if($showPasswordForm) bg-slate-100 opacity-75 cursor-not-allowed @endif" />
                             <x-input-error :messages="$errors->get('username')" class="mt-2 text-xs text-rose-600" />
                         </div>
 
                         <div>
                             <label for="email" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Email</label>
-                            <input id="email" name="email" type="email" value="{{ old('email') }}" required @if(session('show_password_form')) readonly @endif
-                                class="w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 transition-all duration-200 text-sm font-medium @if(session('show_password_form')) bg-slate-100 opacity-75 cursor-not-allowed @endif" />
+                            <input id="email" name="email" type="email" value="{{ old('email') }}" required @if($showPasswordForm) readonly @endif
+                                class="w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 transition-all duration-200 text-sm font-medium @if($showPasswordForm) bg-slate-100 opacity-75 cursor-not-allowed @endif" />
                             <x-input-error :messages="$errors->get('email')" class="mt-2 text-xs text-rose-600" />
                         </div>
 
-                        @if(session('show_password_form'))
+                        @if($showPasswordForm)
                             <div class="pt-2 border-t border-slate-100 mt-4">
                                 <div>
                                     <label for="password" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Password Baru</label>
@@ -95,13 +99,13 @@
 
                         <div class="grid grid-cols-1 gap-3 sm:flex-row sm:items-center sm:justify-between pt-2">
                             <button type="submit" class="w-full sm:w-auto px-5 py-3 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-semibold rounded-xl transition-all duration-300 shadow-md shadow-teal-500/10 hover:shadow-teal-500/30">
-                                @if(session('show_password_form'))
+                                @if($showPasswordForm)
                                     Perbarui Password
                                 @else
                                     Lanjutkan Verifikasi
                                 @endif
                             </button>
-                            @if(!session('show_password_form'))
+                            @if(!$showPasswordForm)
                                 <a href="{{ url('/') }}" class="text-xs text-teal-600 hover:text-teal-700 font-semibold transition-colors">
                                     Kembali ke Halaman Login
                                 </a>

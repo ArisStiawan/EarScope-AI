@@ -12,7 +12,7 @@
         'method' => 'PATCH',
         'edit' => true,
         'doctor' => $doctor,
-        'submit_label' => 'Update Dokter'
+        'submit_label' => 'Update Data Dokter'
     ])
 </div>
 @endsection

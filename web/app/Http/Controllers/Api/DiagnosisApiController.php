@@ -39,7 +39,6 @@ class DiagnosisApiController extends Controller
                     'doctor' => [
                         'id' => $c->doctor->id,
                         'name' => $c->doctor->name,
-                        'specialization' => $c->doctor->specialization,
                     ],
                     'complaint' => $c->complaint,
                     'scheduled_date' => $c->scheduled_date,

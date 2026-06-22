@@ -134,6 +134,7 @@
                                 @endforeach
                             </tbody>
                         </table>
+                        <x-custom-pagination :paginator="$consultations" :perPage="$perPage" />
                     </div>
                 @endif
             </div>
@@ -149,7 +150,7 @@
                     <p class="text-gray-500">No pending consultation requests at the moment.</p>
                 @else
                     <div class="overflow-x-auto rounded-lg shadow">
-                        <table class="min-w-full divide-y divide-gray-200">
+                        <table class="min-w-full divide-y divide-gray-200 overflow-y-auto">
                             <thead class="bg-gray-50">
                                 <tr class="text-left text-xs text-gray-500 uppercase">
                                     <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient</th>

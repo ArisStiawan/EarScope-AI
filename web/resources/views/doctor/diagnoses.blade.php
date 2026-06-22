@@ -60,6 +60,7 @@
                                 @endforeach
                             </tbody>
                         </table>
+                        <x-custom-pagination :paginator="$consultations" :perPage="$perPage" />
                     </div>
                 @endif
             </div>
@@ -191,7 +192,7 @@
                     </div>
 
                     <div class="mt-6 flex gap-3">
-                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white transition shadow-md shadow-teal-500/20 rounded-md">
                             Submit Diagnosis
                         </button>
                         <button type="button" onclick="closeDiagnosisForm()" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-gray-800 hover:bg-gray-300">
@@ -459,7 +460,7 @@
                     $('#detailPatientName').text(data.patient?.name || '-');
                     $('#detailPatientAge').text(data.patient?.age || '-');
                     $('#detailPatientGender').text(data.patient?.gender || '-');
-                    $('#detailPatientEmail').text(data.patient?.email || '-');
+                    $('#detailPatientEmail').text(data.patient?.user?.email || '-');
                     $('#detailComplaint').text(data.complaint || '-');
                     $('#detailScheduled').text(data.scheduled_date
                         ? new Date(data.scheduled_date).toLocaleDateString('id-ID', {year: 'numeric', month: 'long', day: 'numeric'})

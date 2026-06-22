@@ -71,9 +71,14 @@ class DoctorController extends Controller
                   ->whereYear('scheduled_date', Carbon::today()->year);
         }
 
+        $perPage = $request->input('per_page', 5);
+        if (!in_array($perPage, [5, 10, 15])) {
+            $perPage = 5;
+        }
+
         $consultations = $query->orderBy('scheduled_date', 'asc')
             ->orderBy('scheduled_time', 'asc')
-            ->get();
+            ->paginate($perPage);
 
         $pendingRequests = ConsultationRequest::where('doctor_id', $doctor->id)
             ->where('status', 'pending')
@@ -87,7 +92,8 @@ class DoctorController extends Controller
             'patientsHandledCount',
             'consultations',
             'filter',
-            'pendingRequests'
+            'pendingRequests',
+            'perPage'
         ));
     }
 
@@ -166,6 +172,17 @@ class DoctorController extends Controller
             ActivityLogger::logConsultationApproved($consultation, $doctor);
         }
 
+        // Send notification email to the patient
+        if ($consultation->patient && $consultation->patient->user && $consultation->patient->user->email) {
+            try {
+                \Illuminate\Support\Facades\Mail::to($consultation->patient->user->email)
+                    ->send(new \App\Mail\ConsultationScheduledMail($consultation));
+            } catch (\Exception $e) {
+                // Log the error but don't stop the schedule process
+                \Illuminate\Support\Facades\Log::error('Failed to send consultation schedule email: ' . $e->getMessage());
+            }
+        }
+
         return response()->json([
             'message'        => 'Consultation scheduled successfully',
             'scheduled_date' => $consultation->scheduled_date,
@@ -196,22 +213,23 @@ class DoctorController extends Controller
         }
 
         return response()->json([
-            'id' => $consultation->id,
-            'complaint' => $consultation->complaint,
-            'status' => $consultation->status,
-            'created_at' => $consultation->created_at,
+            'id'             => $consultation->id,
+            'complaint'      => $consultation->complaint,
+            'notes'          => $consultation->notes,
+            'status'         => $consultation->status,
+            'created_at'     => $consultation->created_at,
             'scheduled_date' => $consultation->scheduled_date,
             'scheduled_time' => $consultation->scheduled_time,
-            'diagnosis' => $diagnosisData,
-            'patient' => $consultation->patient ? [
-                'id' => $consultation->patient->id,
-                'name' => $consultation->patient->name,
-                'age' => $consultation->patient->age,
-                'email' => $consultation->patient->user->email ?? null,
-                'gender' => $consultation->patient->gender,
-                'address' => $consultation->patient->address,
-                'birth_date' => $consultation->patient->birth_date
-            ] : null
+            'diagnosis'      => $diagnosisData,
+            'patient'        => $consultation->patient ? [
+                'id'         => $consultation->patient->id,
+                'name'       => $consultation->patient->name,
+                'age'        => $consultation->patient->age,
+                'email'      => $consultation->patient->user->email ?? null,
+                'gender'     => $consultation->patient->gender,
+                'address'    => $consultation->patient->address,
+                'birth_date' => $consultation->patient->birth_date,
+            ] : null,
         ]);
     }
 
@@ -239,15 +257,20 @@ class DoctorController extends Controller
                   ->orderBy('created_at', 'desc');
         }
 
-        $consultations = $query->get();
+        $perPage = $request->input('per_page', 10);
+        if (!in_array($perPage, [5, 10, 15])) {
+            $perPage = 10;
+        }
 
-        return view('doctor.consultations', compact('consultations', 'status'));
+        $consultations = $query->paginate($perPage);
+
+        return view('doctor.consultations', compact('consultations', 'status', 'perPage'));
     }
 
     public function verifyDiagnosis(Request $request, $id)
     {
         $request->validate([
-            'notes' => 'nullable|string|max:1000',
+            'notes' => 'nullable|string|max:2000',
         ]);
 
         $consultation = ConsultationRequest::findOrFail($id);
@@ -259,19 +282,22 @@ class DoctorController extends Controller
             // Jika hasil Jetson belum diunggah tetapi dokter ingin menyelesaikan secara manual
             $diagnosis = Diagnosis::create([
                 'consultation_request_id' => $consultation->id,
-                'diagnosis_result' => 'Diagnosis Manual',
-                'is_verified' => true,
-                'notes' => $request->notes,
+                'diagnosis_result'        => 'Diagnosis Manual',
+                'is_verified'             => true,
+                'notes'                   => $request->notes,
             ]);
         } else {
             $diagnosis->update([
-                'notes' => $request->notes,
+                'notes'       => $request->notes,
                 'is_verified' => true,
             ]);
         }
 
-        // Ubah status konsultasi ke done
-        $consultation->update(['status' => 'done']);
+        // Simpan catatan dokter ke consultation_requests.notes
+        $consultation->update([
+            'status' => 'done',
+            'notes'  => $request->notes,
+        ]);
 
         // Log activity
         $doctor = $this->getDoctor();
@@ -280,9 +306,9 @@ class DoctorController extends Controller
             "Dokter '{$doctor->name}' memverifikasi diagnosis pasien '{$consultation->patient->name}'",
             [
                 'consultation_id' => $consultation->id,
-                'diagnosis_id' => $diagnosis->id,
-                'doctor_id' => $doctor->id,
-                'notes' => $request->notes,
+                'diagnosis_id'    => $diagnosis->id,
+                'doctor_id'       => $doctor->id,
+                'notes'           => $request->notes,
             ],
             $doctor->user_id
         );
@@ -290,16 +316,41 @@ class DoctorController extends Controller
         return redirect()->route('doctor.consultations')->with('success', 'Konsultasi berhasil diverifikasi dan diselesaikan.');
     }
 
-    public function patientsProfile()
+    /**
+     * Simpan catatan dokter ke consultation_requests.notes (tanpa verifikasi/selesaikan).
+     */
+    public function saveNotes(Request $request, $id)
+    {
+        $request->validate([
+            'notes' => 'nullable|string|max:2000',
+        ]);
+
+        $consultation = ConsultationRequest::findOrFail($id);
+        $this->authorizeDoctor($consultation);
+
+        $consultation->update(['notes' => $request->notes]);
+
+        return response()->json([
+            'message' => 'Catatan berhasil disimpan',
+            'notes'   => $consultation->notes,
+        ]);
+    }
+
+    public function patientsProfile(Request $request)
     {
         $doctor = $this->getDoctor();
 
+        $perPage = $request->input('per_page', 10);
+        if (!in_array($perPage, [5, 10, 15])) {
+            $perPage = 10;
+        }
+
         // Get unique patients who have consultations with this doctor
         $patients = Patient::whereHas('consultations', function ($q) use ($doctor) {
-        $q->where('doctor_id', $doctor->id);
-        })->with('user')->get();
+            $q->where('doctor_id', $doctor->id);
+        })->with('user')->paginate($perPage);
 
-        return view('doctor.patients-profile', compact('patients'));
+        return view('doctor.patients-profile', compact('patients', 'perPage'));
     }
 
     /**

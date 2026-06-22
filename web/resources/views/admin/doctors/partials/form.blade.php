@@ -47,23 +47,6 @@
         @enderror
     </div>
 
-    <!-- Specialization -->
-    <div>
-        <label for="specialization" class="block text-sm font-medium text-gray-700">Spesialisasi</label>
-        <select id="specialization" name="specialization" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 border focus:border-blue-500 focus:ring-blue-500">
-            <option value="">-- Pilih Spesialisasi --</option>
-            <option value="Umum" @selected(old('specialization', $doctor->specialization ?? '') === 'Umum')>Umum</option>
-            <option value="Gigi" @selected(old('specialization', $doctor->specialization ?? '') === 'Gigi')>Gigi</option>
-            <option value="Anak" @selected(old('specialization', $doctor->specialization ?? '') === 'Anak')>Anak</option>
-            <option value="Kandungan" @selected(old('specialization', $doctor->specialization ?? '') === 'Kandungan')>Kandungan</option>
-            <option value="Jantung" @selected(old('specialization', $doctor->specialization ?? '') === 'Jantung')>Jantung</option>
-            <option value="Saraf" @selected(old('specialization', $doctor->specialization ?? '') === 'Saraf')>Saraf</option>
-        </select>
-        @error('specialization')
-            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-        @enderror
-    </div>
-
     <!-- Gender -->
     <div>
         <label class="block text-sm font-medium text-gray-700 mb-2">Jenis Kelamin</label>
@@ -84,7 +67,7 @@
 
     <!-- Buttons -->
     <div class="flex gap-3 pt-6">
-        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">
+        <button type="submit" class="px-4 py-2 bg-gradient-to-r from-teal-600 to-emerald-600 text-white rounded-md transition hover:from-teal-700 hover:to-emerald-700">
             {{ $submit_label ?? 'Simpan' }}
         </button>
         <a href="{{ route('admin.doctors.index') }}" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition">

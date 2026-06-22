@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('patient_id')->constrained()->cascadeOnDelete();
             $table->foreignId('doctor_id')->constrained()->cascadeOnDelete();
             $table->text('complaint');
+            $table->text('notes')->nullable();
             $table->date('scheduled_date')->nullable();
             $table->time('scheduled_time')->nullable();
             $table->enum('status',['pending','scheduled','cancelled','done'])->default('pending');

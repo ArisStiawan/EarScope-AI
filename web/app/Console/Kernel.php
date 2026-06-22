@@ -12,8 +12,9 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // Auto-cancel consultations that haven't been diagnosed within 24 hours
-        $schedule->command('consultation:auto-cancel')->everyFiveMinutes();
+        // Auto-cancel consultations whose scheduled_date has passed without a diagnosis
+        // Dijalankan setiap hari pada pukul 00:05 dini hari
+        $schedule->command('consultation:auto-cancel')->dailyAt('00:05');
     }
 
     /**
