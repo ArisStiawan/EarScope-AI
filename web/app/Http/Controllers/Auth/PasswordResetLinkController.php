@@ -42,15 +42,11 @@ class PasswordResetLinkController extends Controller
                     ->withErrors(['username' => __('Username tidak ditemukan.')]);
             }
 
-            // Check if user's patient record email matches
-            $patient = $user->patient;
-            if (! $patient || $patient->email !== $request->email) {
+            // Check if user's email matches
+            if ($user->email !== $request->email) {
                 return back()->withInput($request->only('username', 'email'))
                     ->withErrors(['email' => __('Username dan email tidak cocok.')]);
             }
-
-            // Sync email to user record
-            $user->update(['email' => $request->email]);
 
             // Generate password reset token
             $token = Str::random(64);

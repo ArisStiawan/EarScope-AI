@@ -35,7 +35,7 @@
                 <tbody class="divide-y divide-slate-100 text-sm">
                     @foreach($doctors as $key => $doctor)
                         <tr class="hover:bg-slate-50/40 transition-colors duration-250">
-                            <td class="px-6 py-4 text-slate-400 font-medium">{{ $key + 1 }}</td>
+                            <td class="px-6 py-4 text-slate-400 font-medium">{{ ($doctors->currentPage() - 1) * $doctors->perPage() + $key + 1 }}</td>
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-3">
                                     <div class="h-9 w-9 rounded-xl bg-teal-50 flex items-center justify-center shrink-0 border border-teal-100/30">
@@ -54,8 +54,8 @@
                                     {{ $doctor->license_number }}
                                 </span>
                             </td>
-                            <td class="px-6 py-4 text-slate-600 font-semibold">
-                                {{ $doctor->specialization }}
+                            <td class="px-6 py-4 text-slate-500 font-medium">
+                                {{ $doctor->specialization ?? '-' }}
                             </td>
                             <td class="px-6 py-4 text-slate-500 font-medium">
                                 {{ $doctor->gender === 'male' ? 'Laki-laki' : 'Perempuan' }}
@@ -82,6 +82,7 @@
                     @endforeach
                 </tbody>
             </table>
+            <x-custom-pagination :paginator="$doctors" :perPage="$perPage" />
         @else
             <div class="px-6 py-16 text-center">
                 <div class="w-14 h-14 bg-slate-50 rounded-full flex items-center justify-center mx-auto text-slate-400 mb-3 animate-float">

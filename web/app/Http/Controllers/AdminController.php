@@ -150,7 +150,6 @@ class AdminController extends Controller
             'password' => 'required',
             'name' => 'required',
             'license_number' => 'required',
-            'specialization' => 'required',
             'gender' => 'required|in:male,female',
         ]);
 
@@ -166,7 +165,6 @@ class AdminController extends Controller
             'user_id' => $user->id,
             'name' => $request->name,
             'license_number' => $request->license_number,
-            'specialization' => $request->specialization,
             'gender' => $request->gender,
         ]);
 
@@ -187,14 +185,12 @@ class AdminController extends Controller
         $request->validate([
             'name' => 'required',
             'license_number' => 'required',
-            'specialization' => 'required',
             'gender' => 'required|in:male,female',
         ]);
 
         $doctor->update([
             'name' => $request->name,
             'license_number' => $request->license_number,
-            'specialization' => $request->specialization,
             'gender' => $request->gender,
         ]);
 
@@ -214,23 +210,33 @@ class AdminController extends Controller
             ->with('success', 'Dokter berhasil dihapus');
     }
 
-    public function indexDoctor()
+    public function indexDoctor(Request $request)
     {
-        $doctors = Doctor::with('user')->latest()->get();
+        $perPage = $request->input('per_page', 10);
+        if (!in_array($perPage, [5, 10, 15])) {
+            $perPage = 10;
+        }
 
-        return view('admin.doctors.index', compact('doctors'));
+        $doctors = Doctor::with('user')->latest()->paginate($perPage);
+
+        return view('admin.doctors.index', compact('doctors', 'perPage'));
     }
 
     /**
      * Show all registered patients (username & registration date only)
      */
-    public function indexPatients()
+    public function indexPatients(Request $request)
     {
+        $perPage = $request->input('per_page', 10);
+        if (!in_array($perPage, [5, 10, 15])) {
+            $perPage = 10;
+        }
+
         $patients = User::where('role', 'patient')
             ->select('id', 'username', 'created_at')
             ->latest()
-            ->get();
+            ->paginate($perPage);
 
-        return view('admin.patients.index', compact('patients'));
+        return view('admin.patients.index', compact('patients', 'perPage'));
     }
 }

@@ -533,7 +533,13 @@ def capture_photo():
                 'consultation_id':    consultation_id,
                 'ai_screening_result': ai_result,
             }
-            response = requests.post(api_url, files=files, data=post_data, timeout=15)
+            response = requests.post(
+                api_url,
+                files=files,
+                data=post_data,
+                timeout=15,
+                headers={'Accept': 'application/json'},
+            )
 
         logger.info(f"[capture_photo] API Response: {response.status_code}")
         if response.ok:
@@ -547,21 +553,41 @@ def capture_photo():
         return jsonify({'status': 'warning', 'message': f'Foto tersimpan lokal tapi gagal dikirim: {str(e)}', 'detections': detected_labels}), 207
 
 
+def _mime_for_video(path):
+    """Deteksi MIME type video berdasarkan ekstensi file."""
+    ext = os.path.splitext(path)[1].lower()
+    return {
+        '.webm': 'video/webm',
+        '.mp4':  'video/mp4',
+        '.avi':  'video/x-msvideo',
+        '.mov':  'video/quicktime',
+        '.mkv':  'video/x-matroska',
+    }.get(ext, 'video/mp4')
+
+
 def send_to_api(raw_path, bbox_path, diagnosis, consultation_id=''):
     url = app.config['API_VIDEO_URL']
     logger.info(f"Mengirim data ke API: {url}")
     logger.info(f"Raw: {raw_path} | Bbox: {bbox_path} | Diagnosis: {diagnosis} | ID: {consultation_id}")
     try:
+        raw_mime  = _mime_for_video(raw_path)
+        bbox_mime = _mime_for_video(bbox_path)
+        logger.info(f"MIME → raw={raw_mime}, bbox={bbox_mime}")
         with open(raw_path, 'rb') as raw, open(bbox_path, 'rb') as bbox:
             files = {
-                'raw_video':       (os.path.basename(raw_path),  raw,  'video/mp4'),
-                'processed_video': (os.path.basename(bbox_path), bbox, 'video/mp4')
+                'raw_video':       (os.path.basename(raw_path),  raw,  raw_mime),
+                'processed_video': (os.path.basename(bbox_path), bbox, bbox_mime)
             }
             data = {
                 'hasil_diagnosis': diagnosis,
                 'consultation_id': consultation_id
             }
-            response = requests.post(url, files=files, data=data)
+            response = requests.post(
+                url,
+                files=files,
+                data=data,
+                headers={'Accept': 'application/json'},
+            )
 
         logger.info(f"API Status: {response.status_code}")
         try:

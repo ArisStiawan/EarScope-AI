@@ -84,7 +84,7 @@
 
     <!-- Buttons -->
     <div class="flex gap-3 pt-6">
-        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">
+        <button type="submit" class="px-4 py-2 bg-gradient-to-r from-teal-600 to-emerald-600 text-white rounded-md transition hover:from-teal-700 hover:to-emerald-700">
             {{ $submit_label ?? 'Save' }}
         </button>
         <a href="{{ route('admin.doctors.index') }}" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition">

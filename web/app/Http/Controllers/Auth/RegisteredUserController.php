@@ -39,13 +39,14 @@ class RegisteredUserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'birth_date' => ['required', 'date'],
             'address' => ['required'],
-            'email' => ['required', 'email'],
+            'email' => ['required', 'email', 'unique:users,email'],
             'gender' => ['required', 'in:male,female'],
         ]);
 
         // create user (role = patient)
         $user = User::create([
             'username' => $request->username,
+            'email' => $request->email,
             'password' => Hash::make($request->password),
             'role' => 'patient',
         ]);
@@ -60,7 +61,6 @@ class RegisteredUserController extends Controller
             'birth_date' => $request->birth_date,
             'age' => $age,
             'address' => $request->address,
-            'email' => $request->email,
             'gender' => $request->gender,
         ]);
 

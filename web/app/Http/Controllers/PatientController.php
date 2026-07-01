@@ -9,7 +9,7 @@ use App\Helpers\ActivityLogger;
 
 class PatientController extends Controller
 {
-    public function dashboard()
+    public function dashboard(Request $request)
     {
         $patient = auth()->user()->patient;
 
@@ -23,6 +23,11 @@ class PatientController extends Controller
             ->orderBy('scheduled_date', 'asc')
             ->first();
 
+        $perPage = $request->input('per_page', 5);
+        if (!in_array($perPage, [5, 10, 15])) {
+            $perPage = 5;
+        }
+
         // Filter: only scheduled and pending, sorted by status (scheduled first) then by nearest date
         $consultations = $patient->consultations()
             ->with('doctor')
@@ -30,9 +35,9 @@ class PatientController extends Controller
             ->orderByRaw("CASE WHEN status = 'scheduled' THEN 0 ELSE 1 END")
             ->orderBy('scheduled_date', 'asc')
             ->orderBy('created_at', 'desc')
-            ->paginate(10);
+            ->paginate($perPage);
 
-        return view('patient.dashboard', compact('consultations', 'totalRequests', 'totalDone', 'nextScheduled'));
+        return view('patient.dashboard', compact('consultations', 'totalRequests', 'totalDone', 'nextScheduled', 'perPage'));
     }
 
     public function createConsultation()
@@ -63,17 +68,22 @@ class PatientController extends Controller
             ->with('success', 'Consultation request submitted successfully! Waiting for doctor confirmation.');
     }
 
-    public function consultationResults()
+    public function consultationResults(Request $request)
     {
         $patient = auth()->user()->patient;
+
+        $perPage = $request->input('per_page', 10);
+        if (!in_array($perPage, [5, 10, 15])) {
+            $perPage = 10;
+        }
 
         $consultations = $patient->consultations()
             ->with(['doctor', 'diagnosis'])
             ->where('status', 'done')
             ->orderBy('scheduled_date', 'asc')
-            ->paginate(10);
+            ->paginate($perPage);
 
-        return view('patient.consultation-result', compact('consultations'));
+        return view('patient.consultation-result', compact('consultations', 'perPage'));
     }
 
     public function getConsultationDetails($id)
@@ -106,17 +116,17 @@ class PatientController extends Controller
         }
 
         return response()->json([
-            'id' => $consultation->id,
-            'complaint' => $consultation->complaint,
-            'status' => $consultation->status,
-            'created_at' => $consultation->created_at,
+            'id'             => $consultation->id,
+            'complaint'      => $consultation->complaint,
+            'notes'          => $consultation->notes,
+            'status'         => $consultation->status,
+            'created_at'     => $consultation->created_at,
             'scheduled_date' => $consultation->scheduled_date,
             'scheduled_time' => $consultation->scheduled_time,
-            'doctor' => $consultation->doctor ? [
-                'id' => $consultation->doctor->id,
-                'name' => $consultation->doctor->name,
-                'specialization' => $consultation->doctor->specialization ?? 'ENT Specialist',
-                'email' => $consultation->doctor->user->email ?? 'N/A'
+            'doctor'         => $consultation->doctor ? [
+                'id'             => $consultation->doctor->id,
+                'name'           => $consultation->doctor->name,
+                'email'          => $consultation->doctor->user->email ?? 'N/A',
             ] : null,
             'diagnosis' => $diagnosisData,
         ]);

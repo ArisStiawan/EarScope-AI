@@ -10,7 +10,6 @@ class Doctor extends Model
         'user_id',
         'name',
         'license_number',
-        'specialization',
         'gender'
     ];
 

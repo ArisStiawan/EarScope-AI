@@ -22,7 +22,7 @@ class AutoCancelExpiredConsultations extends Command
      *
      * @var string
      */
-    protected $description = 'Automatically cancel consultations that have not been diagnosed within 24 hours of scheduled time';
+    protected $description = 'Automatically cancel consultations whose scheduled date has passed without a diagnosis';
 
     /**
      * Execute the console command.
@@ -30,35 +30,35 @@ class AutoCancelExpiredConsultations extends Command
     public function handle()
     {
         $cancelled_count = 0;
+        $today = Carbon::today();
 
-        // Find all scheduled consultations without diagnosis and older than 24 hours
+        /**
+         * Cari semua konsultasi dengan status 'scheduled' yang:
+         * 1. Belum memiliki diagnosis
+         * 2. Tanggal jadwal sudah terlewat (scheduled_date < hari ini)
+         *
+         * Artinya: jika jadwal = 18 Juni dan hari ini sudah 19 Juni ke atas,
+         * maka konsultasi otomatis dibatalkan karena tidak ada diagnosis.
+         */
         $consultations = ConsultationRequest::where('status', 'scheduled')
             ->whereDoesntHave('diagnosis')
             ->whereNotNull('scheduled_date')
-            ->whereNotNull('scheduled_time')
+            ->whereDate('scheduled_date', '<', $today)
             ->get();
 
         foreach ($consultations as $consultation) {
-            // Combine scheduled_date and scheduled_time
-            $scheduledDateTime = Carbon::createFromFormat(
-                'Y-m-d H:i:s',
-                $consultation->scheduled_date . ' ' . $consultation->scheduled_time
+            $consultation->update(['status' => 'cancelled']);
+
+            // Log auto-pembatalan
+            ActivityLogger::logConsultationRejected($consultation, $consultation->doctor);
+
+            $cancelled_count++;
+
+            $this->info(
+                "Cancelled consultation #{$consultation->id} " .
+                "(scheduled: {$consultation->scheduled_date}) " .
+                "for patient {$consultation->patient->name}"
             );
-
-            // Add 24 hours
-            $expiryDateTime = $scheduledDateTime->addHours(24);
-
-            // Check if we're past the expiry time
-            if (Carbon::now() > $expiryDateTime) {
-                $consultation->update(['status' => 'cancelled']);
-
-                // Log the auto-cancellation
-                ActivityLogger::logConsultationRejected($consultation, $consultation->doctor);
-                
-                $cancelled_count++;
-
-                $this->info("Cancelled consultation #{$consultation->id} for patient {$consultation->patient->name}");
-            }
         }
 
         $this->info("Auto-cancel job completed. {$cancelled_count} consultation(s) cancelled.");

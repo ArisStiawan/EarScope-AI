@@ -12,7 +12,6 @@ class Patient extends Model
         'birth_date',
         'age',
         'address',
-        'email',
         'gender'
         ];
         
