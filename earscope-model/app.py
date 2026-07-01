@@ -311,23 +311,17 @@ def process_and_send(frames, consultation_id):
     width, height = 1280, 720
 
     # --- Write raw video ---
-    raw_path  = os.path.join(folder, f"raw_{timestamp}.webm")
-    fourcc    = cv2.VideoWriter_fourcc(*'VP80')
+    raw_path  = os.path.join(folder, f"raw_{timestamp}.mp4")
+    fourcc    = cv2.VideoWriter_fourcc(*'mp4v')
     raw_writer = cv2.VideoWriter(raw_path, fourcc, 20.0, (width, height))
-    if not raw_writer.isOpened():
-        logger.warning("VP80 gagal, fallback ke mp4v")
-        raw_path   = os.path.join(folder, f"raw_{timestamp}.mp4")
-        fourcc     = cv2.VideoWriter_fourcc(*'mp4v')
-        raw_writer = cv2.VideoWriter(raw_path, fourcc, 20.0, (width, height))
 
     for frame in frames:
         raw_writer.write(frame)
     raw_writer.release()
 
     # --- Run YOLO and write bbox video ---
-    raw_ext    = os.path.splitext(raw_path)[1]
-    bbox_path  = os.path.join(folder, f"bbox_{timestamp}{raw_ext}")
-    bbox_fourcc = cv2.VideoWriter_fourcc(*'VP80') if raw_ext == '.webm' else cv2.VideoWriter_fourcc(*'mp4v')
+    bbox_path  = os.path.join(folder, f"bbox_{timestamp}.mp4")
+    bbox_fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     bbox_writer = cv2.VideoWriter(bbox_path, bbox_fourcc, 20.0, (width, height))
 
     detected_classes = []
