@@ -14,6 +14,7 @@ class ConsultationRequest extends Model
         'status',
         'scheduled_date',
         'scheduled_time',
+        'queue_number',
     ];
 
     public function patient()

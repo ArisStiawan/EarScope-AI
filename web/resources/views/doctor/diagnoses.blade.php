@@ -29,37 +29,50 @@
                                 class="ml-2 inline-flex items-center px-3 py-2 bg-gray-100 text-sm rounded-md hover:bg-gray-200">Clear</button>
                         </div>
                     </div>
-                    <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr class="text-left text-xs text-gray-500 uppercase tracking-wider">
-                                    <th class="px-4 py-2">ID</th>
-                                    <th class="px-4 py-2">Patient</th>
-                                    <th class="px-4 py-2">Complaint</th>
-                                    <th class="px-4 py-2">Scheduled</th>
-                                    <th class="px-4 py-2">Status</th>
-                                    <th class="px-4 py-2">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                @foreach($consultations as $consultation)
-                                    <tr>
-                                        <td class="px-4 py-2 text-sm font-mono font-bold text-indigo-700 bg-indigo-50 rounded">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        @foreach($consultations as $consultation)
+                            <div class="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow p-5 flex flex-col justify-between">
+                                <div>
+                                    <div class="flex items-center justify-between mb-3">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                            {{ ucfirst($consultation->status) }}
+                                        </span>
+                                        <span class="text-xs font-mono font-bold text-indigo-700 bg-indigo-50 px-2 py-1 rounded">
                                             #{{ $consultation->id }}
-                                        </td>
-                                        <td class="px-4 py-2 text-sm text-gray-900">{{ $consultation->patient->name ?? 'N/A' }}</td>
-                                        <td class="px-4 py-2 text-sm text-gray-900">{{ Str::limit($consultation->complaint, 50) }}</td>
-                                        <td class="px-4 py-2 text-sm text-gray-900">{{ \Carbon\Carbon::parse($consultation->scheduled_date)->format('d M Y') }} {{ $consultation->scheduled_time }}</td>
-                                        <td class="px-4 py-2 text-sm text-green-800">{{ ucfirst($consultation->status) }}</td>
-                                        <td class="px-4 py-2 text-sm">
-                                            <button type="button" onclick="openDiagnosisForm('{{ $consultation->id }}', '{{ addslashes($consultation->patient->name ?? 'N/A') }}')" class="text-indigo-600 hover:text-indigo-900 underline font-medium">
-                                                Add Diagnosis
-                                            </button>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                                        </span>
+                                    </div>
+                                    
+                                    <div class="mb-4">
+                                        <h4 class="text-lg font-bold text-gray-900">{{ $consultation->patient->name ?? 'N/A' }}</h4>
+                                        <div class="text-xs text-indigo-600 font-bold bg-indigo-50 px-2 py-0.5 rounded inline-block mt-1">RM: {{ $consultation->patient->medical_record_number ?? '-' }}</div>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <p class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Keluhan</p>
+                                        <p class="text-sm text-gray-700 line-clamp-2">{{ $consultation->complaint }}</p>
+                                    </div>
+
+                                    <div class="mb-4 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                                        <p class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Jadwal</p>
+                                        <div class="flex items-center text-sm font-semibold text-gray-800">
+                                            <svg class="w-4 h-4 mr-1.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                            {{ \Carbon\Carbon::parse($consultation->scheduled_date)->format('d M Y') }}
+                                        </div>
+                                        <div class="mt-1 flex items-center text-xs font-bold text-indigo-600">
+                                            <svg class="w-4 h-4 mr-1.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                                            Antrean: {{ $consultation->queue_number ?? '-' }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button type="button" onclick="openDiagnosisForm('{{ $consultation->id }}', '{{ addslashes($consultation->patient->name ?? 'N/A') }}')" class="w-full inline-flex justify-center items-center px-4 py-2 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white transition shadow-md shadow-teal-500/20 rounded-lg">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                                    Add Diagnosis
+                                </button>
+                            </div>
+                        @endforeach
+                    </div>
+                    <div class="mt-6">
                         <x-custom-pagination :paginator="$consultations" :perPage="$perPage" />
                     </div>
                 @endif
@@ -82,6 +95,10 @@
                         <div>
                             <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Patient Name</p>
                             <p class="mt-1 text-sm font-medium text-gray-900" id="detailPatientName">-</p>
+                        </div>
+                        <div>
+                            <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">No. RM</p>
+                            <p class="mt-1 text-sm font-bold text-indigo-600" id="detailPatientRM">-</p>
                         </div>
                         <div>
                             <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Age</p>
@@ -458,13 +475,14 @@
                 type: 'GET',
                 success: function (data) {
                     $('#detailPatientName').text(data.patient?.name || '-');
+                    $('#detailPatientRM').text(data.patient?.medical_record_number || '-');
                     $('#detailPatientAge').text(data.patient?.age || '-');
                     $('#detailPatientGender').text(data.patient?.gender || '-');
                     $('#detailPatientEmail').text(data.patient?.email || '-');
                     $('#detailComplaint').text(data.complaint || '-');
                     $('#detailScheduled').text(data.scheduled_date
                         ? new Date(data.scheduled_date).toLocaleDateString('id-ID', {year: 'numeric', month: 'long', day: 'numeric'})
-                          + ' ' + (data.scheduled_time || '')
+                          + ' · Antrean: ' + (data.queue_number || '-')
                         : '-');
 
                     // Update patient name if we got it from API

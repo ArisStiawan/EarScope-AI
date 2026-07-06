@@ -77,7 +77,7 @@ class DoctorController extends Controller
         }
 
         $consultations = $query->orderBy('scheduled_date', 'asc')
-            ->orderBy('scheduled_time', 'asc')
+            ->orderBy('queue_number', 'asc')
             ->paginate($perPage);
 
         $pendingRequests = ConsultationRequest::where('doctor_id', $doctor->id)
@@ -141,7 +141,18 @@ class DoctorController extends Controller
         $consultation = ConsultationRequest::findOrFail($id);
         $this->authorizeDoctor($consultation);
 
-        $consultation->update(['status' => 'cancelled']);
+        if ($consultation->status === 'scheduled' && $consultation->scheduled_date) {
+            ConsultationRequest::where('doctor_id', $consultation->doctor_id)
+                ->whereIn('status', ['scheduled', 'done'])
+                ->whereDate('scheduled_date', $consultation->scheduled_date)
+                ->where('queue_number', '>', $consultation->queue_number)
+                ->decrement('queue_number');
+        }
+
+        $consultation->update([
+            'status' => 'cancelled',
+            'queue_number' => null
+        ]);
         
         // Log consultation rejection
         $doctor = $this->getDoctor();
@@ -156,8 +167,7 @@ class DoctorController extends Controller
     public function schedule(Request $request, $id)
     {
         $request->validate([
-            'scheduled_date' => 'required|date|after_or_equal:today',
-            'scheduled_time' => 'required|date_format:H:i'
+            'scheduled_date' => 'required|date|after_or_equal:today'
         ]);
 
         $consultation = ConsultationRequest::findOrFail($id);
@@ -177,11 +187,45 @@ class DoctorController extends Controller
         }
 
         $wasAlreadyScheduled = $consultation->status === 'scheduled';
+        $doctor = $this->getDoctor();
+
+        $scheduledCount = ConsultationRequest::where('doctor_id', $doctor->id)
+            ->whereIn('status', ['scheduled', 'done'])
+            ->whereDate('scheduled_date', $request->scheduled_date)
+            ->when($wasAlreadyScheduled, function($query) use ($consultation) {
+                // Don't count the current consultation if it's already scheduled for this date
+                return $query->where('id', '!=', $consultation->id);
+            })
+            ->count();
+
+        // Check patient quota for the selected date
+        if ($doctor->patient_quota > 0) {
+            if ($scheduledCount >= $doctor->patient_quota) {
+                return response()->json([
+                    'error' => 'Kuota pasien untuk tanggal tersebut sudah penuh (' . $doctor->patient_quota . ' pasien).'
+                ], 400);
+            }
+        }
+
+        $queueNumber = $consultation->queue_number;
+        // If not already scheduled on this date, get a new queue number
+        if (!$wasAlreadyScheduled || $consultation->scheduled_date !== $request->scheduled_date) {
+            $queueNumber = $scheduledCount + 1;
+
+            // Re-order the queue on the old date if it was previously scheduled
+            if ($wasAlreadyScheduled && $consultation->scheduled_date) {
+                ConsultationRequest::where('doctor_id', $doctor->id)
+                    ->whereIn('status', ['scheduled', 'done'])
+                    ->whereDate('scheduled_date', $consultation->scheduled_date)
+                    ->where('queue_number', '>', $consultation->queue_number)
+                    ->decrement('queue_number');
+            }
+        }
 
         $consultation->update([
             'status'         => 'scheduled',
             'scheduled_date' => $request->scheduled_date,
-            'scheduled_time' => $request->scheduled_time,
+            'queue_number'   => $queueNumber,
         ]);
 
         // Log approval only if it was still pending
@@ -204,7 +248,7 @@ class DoctorController extends Controller
         return response()->json([
             'message'        => 'Consultation scheduled successfully',
             'scheduled_date' => $consultation->scheduled_date,
-            'scheduled_time' => $consultation->scheduled_time,
+            'queue_number'   => $consultation->queue_number,
         ]);
     }
 
@@ -237,12 +281,13 @@ class DoctorController extends Controller
             'status'         => $consultation->status,
             'created_at'     => $consultation->created_at,
             'scheduled_date' => $consultation->scheduled_date,
-            'scheduled_time' => $consultation->scheduled_time,
+            'queue_number'   => $consultation->queue_number,
             'diagnosis'      => $diagnosisData,
             'patient'        => $consultation->patient ? [
                 'id'         => $consultation->patient->id,
                 'name'       => $consultation->patient->name,
                 'age'        => $consultation->patient->age,
+                'medical_record_number' => $consultation->patient->medical_record_number,
                 'email'      => $consultation->patient->user->email ?? null,
                 'gender'     => $consultation->patient->gender,
                 'address'    => $consultation->patient->address,

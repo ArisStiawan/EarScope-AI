@@ -42,7 +42,7 @@ class DiagnosisApiController extends Controller
                     ],
                     'complaint' => $c->complaint,
                     'scheduled_date' => $c->scheduled_date,
-                    'scheduled_time' => $c->scheduled_time,
+                    'queue_number' => $c->queue_number,
                 ];
             })
         ]);

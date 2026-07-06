@@ -29,7 +29,7 @@ class DiagnosisController extends Controller
             ->whereDoesntHave('diagnosis')
             ->with('patient')
             ->orderBy('scheduled_date', 'asc')
-            ->orderBy('scheduled_time', 'asc')
+            ->orderBy('queue_number', 'asc')
             ->paginate($perPage);
 
         return view('doctor.diagnoses', compact('consultations', 'perPage'));

@@ -80,7 +80,10 @@
                                                         <span class="font-bold text-slate-800">
                                                             {{ $consultation->patient->name ?? 'N/A' }}
                                                         </span>
-                                                        <p class="text-[10px] text-slate-400 font-semibold mt-0.5">Umur: {{ $consultation->patient->age ?? '-' }} Tahun</p>
+                                                        <div class="flex items-center gap-2 mt-0.5">
+                                                            <span class="text-[10px] text-slate-400 font-semibold">Umur: {{ $consultation->patient->age ?? '-' }} Tahun</span>
+                                                            <span class="text-[10px] text-indigo-500 font-bold bg-indigo-50 px-1.5 py-0.5 rounded">RM: {{ $consultation->patient->medical_record_number ?? '-' }}</span>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </td>
@@ -102,7 +105,7 @@
                                                 @if($consultation->scheduled_date)
                                                     <div class="flex flex-col">
                                                         <span class="font-bold text-slate-800">{{ \Carbon\Carbon::parse($consultation->scheduled_date)->format('d M Y') }}</span>
-                                                        <span class="text-[11px] text-slate-400 font-medium">{{ $consultation->scheduled_time }} WIB</span>
+                                                        <span class="text-[11px] text-indigo-600 font-bold">Antrean: {{ $consultation->queue_number }}</span>
                                                     </div>
                                                 @else
                                                     <span class="text-xs text-slate-400 font-medium italic">Belum dijadwalkan</span>
@@ -218,33 +221,9 @@
                                         <p class="text-sm text-slate-700 mt-0.5">${data.notes}</p>
                                     </div>
                                 ` : ''}
-                                <div class="bg-slate-50 rounded-xl p-3 mb-3">
-                                    <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Status Verifikasi</p>
-                                    <span class="mt-1 inline-flex px-2 py-0.5 text-xs font-bold rounded-full border ${d.is_verified ? 'bg-emerald-50 text-emerald-700 border-emerald-200/50' : 'bg-amber-50 text-amber-700 border-amber-200/50'}">
-                                        ${d.is_verified ? 'Terverifikasi' : 'Belum Diverifikasi'}
-                                    </span>
-                                </div>
                                 ${imagesHtml ? `
                                     <div class="grid grid-cols-2 gap-3 mt-3">${imagesHtml}</div>
                                 ` : ''}
-                            </div>
-
-                            ${!d.is_verified && data.status !== 'done' ? `
-                                <div class="pt-5 border-t border-slate-100">
-                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3">Catatan Dokter</p>
-                                    <form id="verifyForm" onsubmit="submitVerification(event, ${data.id})">
-                                        <textarea id="doctorNotes" rows="3" class="w-full rounded-xl border-slate-200 text-sm placeholder-slate-300 focus:border-teal-400 focus:ring-teal-400" placeholder="Tambahkan catatan dokter (opsional)...">${data.notes || ''}</textarea>
-                                    </form>
-                                </div>
-                            ` : ''}
-                        `;
-                    } else if (data.status === 'approved' || data.status === 'scheduled') {
-                        aiSection = `
-                            <div class="pt-5 border-t border-slate-100">
-                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3">Catatan Dokter</p>
-                                <form id="verifyForm" onsubmit="submitVerification(event, ${data.id})">
-                                    <textarea id="doctorNotes" rows="3" class="w-full rounded-xl border-slate-200 text-sm placeholder-slate-300 focus:border-teal-400 focus:ring-teal-400" placeholder="Tambahkan catatan dokter (opsional)...">${data.notes || ''}</textarea>
-                                </form>
                             </div>
                         `;
                     }
@@ -262,6 +241,10 @@
                                     <div class="bg-slate-50 rounded-xl p-3">
                                         <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Usia</p>
                                         <p class="text-sm font-bold text-slate-800 mt-0.5">${data.patient?.age ?? '-'} Tahun</p>
+                                    </div>
+                                    <div class="bg-slate-50 rounded-xl p-3">
+                                        <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">No. RM</p>
+                                        <p class="text-sm font-bold text-indigo-600 mt-0.5">${data.patient?.medical_record_number ?? '-'}</p>
                                     </div>
                                     <div class="bg-slate-50 rounded-xl p-3">
                                         <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Email</p>
@@ -292,7 +275,7 @@
                                     <div class="bg-slate-50 rounded-xl p-3">
                                         <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Jadwal</p>
                                         <p class="text-sm font-bold text-slate-800 mt-0.5">
-                                            ${data.scheduled_date ? data.scheduled_date + ' · ' + data.scheduled_time : 'Belum dijadwalkan'}
+                                            ${data.scheduled_date ? data.scheduled_date + ' · Antrean: ' + data.queue_number : 'Belum dijadwalkan'}
                                         </p>
                                     </div>
                                     ${data.notes ? `
@@ -313,25 +296,6 @@
                         </div>`;
 
                     $('#modalContent').html(content);
-
-                    // Show verify button in footer if applicable
-                    const showVerify = data.diagnosis && !data.diagnosis.is_verified && data.status !== 'done';
-                    const showManualVerify = !data.diagnosis && (data.status === 'approved' || data.status === 'scheduled');
-                    if (showVerify || showManualVerify) {
-                        $('#modalFooter').html(`
-                        <div class="flex gap-2 justify-end">
-                            <button type="button" onclick="closeDetailModal()" class="px-4 py-2 text-xs font-semibold uppercase tracking-wider rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 transition">
-                                Tutup
-                            </button>
-                            <button id="saveNotesBtn" type="button" onclick="saveConsultationNotes(${data.id})"
-                                class="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white transition shadow-md shadow-teal-500/20">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
-                                </svg>
-                                Simpan
-                            </button>
-                        </div>`);
-                    }
                 },
                 error: function(xhr) {
                     $('#modalContent').html(`
@@ -342,68 +306,6 @@
                             <p class="text-xs font-medium">Gagal memuat detail konsultasi</p>
                         </div>
                     `);
-                }
-            });
-        }
-
-        function submitVerification(event, consultationId) {
-            event.preventDefault();
-            const notes = $('#doctorNotes').val();
-            const btn = $('#modalFooter button:last-child');
-            btn.prop('disabled', true).text('Menyimpan...');
-
-            $.ajax({
-                url: '/doctor/consultation/' + consultationId + '/verify',
-                type: 'POST',
-                data: {
-                    _token: $('meta[name="csrf-token"]').attr('content'),
-                    notes: notes
-                },
-                success: function() {
-                    closeDetailModal();
-                    showNotification('Konsultasi berhasil diverifikasi & diselesaikan', 'success');
-                    setTimeout(() => location.reload(), 1500);
-                },
-                error: function(xhr) {
-                    btn.prop('disabled', false).html(`
-                        <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg> Verifikasi &amp; Selesaikan`);
-                    showNotification('Gagal menyimpan verifikasi', 'error');
-                }
-            });
-        }
-
-        function saveConsultationNotes(consultationId) {
-            const notes = $('#doctorNotes').val();
-            const btn = $('#saveNotesBtn');
-            btn.prop('disabled', true).html(`
-                <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                </svg> Menyimpan...`);
-
-            $.ajax({
-                url: '/doctor/consultation/' + consultationId + '/save-notes',
-                type: 'POST',
-                data: {
-                    _token: $('meta[name="csrf-token"]').attr('content'),
-                    notes: notes
-                },
-                success: function() {
-                    btn.prop('disabled', false).html(`
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
-                        </svg> Simpan`);
-                    showNotification('Catatan berhasil disimpan', 'success');
-                    closeDetailModal();
-                },
-                error: function() {
-                    btn.prop('disabled', false).html(`
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
-                        </svg> Simpan`);
-                    showNotification('Gagal menyimpan catatan', 'error');
                 }
             });
         }

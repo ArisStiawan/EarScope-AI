@@ -74,7 +74,7 @@
 
             <div class="details">
                 <p><strong>Tanggal:</strong> {{ \Carbon\Carbon::parse($consultation->scheduled_date)->translatedFormat('l, d F Y') }}</p>
-                <p><strong>Waktu:</strong> {{ $consultation->scheduled_time }} WIB</p>
+                <p><strong>Antrean:</strong> {{ $consultation->queue_number }}</p>
                 <p><strong>Keluhan:</strong> {{ $consultation->complaint }}</p>
             </div>
 

@@ -29,19 +29,26 @@ class PatientController extends Controller
         }
 
         // Filter: only scheduled and pending, sorted by status (scheduled first) then by nearest date
-        $consultations = $patient->consultations()
-            ->with('doctor')
+        $activeConsultation = $patient->consultations()
+            ->with('doctor.user')
             ->whereIn('status', ['scheduled', 'pending'])
             ->orderByRaw("CASE WHEN status = 'scheduled' THEN 0 ELSE 1 END")
             ->orderBy('scheduled_date', 'asc')
             ->orderBy('created_at', 'desc')
-            ->paginate($perPage);
+            ->first();
 
-        return view('patient.dashboard', compact('consultations', 'totalRequests', 'totalDone', 'nextScheduled', 'perPage'));
+        return view('patient.dashboard', compact('patient', 'activeConsultation', 'totalRequests', 'totalDone', 'nextScheduled', 'perPage'));
     }
 
     public function createConsultation()
     {
+        $patient = auth()->user()->patient;
+        $hasActive = $patient->consultations()->whereIn('status', ['pending', 'scheduled'])->exists();
+        if ($hasActive) {
+            return redirect()->route('patient.dashboard')
+                ->with('error', 'Anda masih memiliki konsultasi yang sedang berjalan.');
+        }
+
         $doctors = Doctor::all();
         return view('patient.create-consultation', compact('doctors'));
     }
@@ -54,6 +61,13 @@ class PatientController extends Controller
         ]);
 
         $patient = auth()->user()->patient;
+
+        $hasActive = $patient->consultations()->whereIn('status', ['pending', 'scheduled'])->exists();
+        if ($hasActive) {
+            return redirect()->route('patient.dashboard')
+                ->with('error', 'Anda masih memiliki konsultasi yang sedang berjalan.');
+        }
+
         $consultation = ConsultationRequest::create([
             'patient_id' => $patient->id,
             'doctor_id' => $request->doctor_id,
@@ -103,7 +117,7 @@ class PatientController extends Controller
             'status'         => $consultation->status,
             'created_at'     => $consultation->created_at,
             'scheduled_date' => $consultation->scheduled_date,
-            'scheduled_time' => $consultation->scheduled_time,
+            'queue_number'   => $consultation->queue_number,
             'doctor'         => $consultation->doctor ? [
                 'id'             => $consultation->doctor->id,
                 'name'           => $consultation->doctor->name,
@@ -134,7 +148,18 @@ class PatientController extends Controller
             ], 400);
         }
 
-        $consultation->update(['status' => 'cancelled']);
+        if ($consultation->status === 'scheduled' && $consultation->scheduled_date) {
+            ConsultationRequest::where('doctor_id', $consultation->doctor_id)
+                ->whereIn('status', ['scheduled', 'done'])
+                ->whereDate('scheduled_date', $consultation->scheduled_date)
+                ->where('queue_number', '>', $consultation->queue_number)
+                ->decrement('queue_number');
+        }
+
+        $consultation->update([
+            'status' => 'cancelled',
+            'queue_number' => null
+        ]);
 
         // Log consultation cancellation
         ActivityLogger::logConsultationRejected($consultation, $consultation->doctor);

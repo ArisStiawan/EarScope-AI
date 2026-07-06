@@ -24,6 +24,17 @@ class MultiPatientSeeder extends Seeder
         }
         $doctor = $doctorUser->doctor;
 
+        // Bersihkan data lama dari seeder ini (patient_02 s/d patient_16)
+        $oldUsernames = array_map(fn($i) => 'patient_' . str_pad($i, 2, '0', STR_PAD_LEFT), range(2, 16));
+        $oldUsers = User::whereIn('username', $oldUsernames)->get();
+        foreach ($oldUsers as $oldUser) {
+            if ($oldUser->patient) {
+                ConsultationRequest::where('patient_id', $oldUser->patient->id)->delete();
+                $oldUser->patient->delete();
+            }
+            $oldUser->delete();
+        }
+
         $complaints = [
             'Telinga kanan terasa sangat gatal dan nyeri ringan selama 3 hari terakhir.',
             'Telinga kiri terasa tersumbat/penuh air setelah berenang kemarin sore.',
@@ -64,20 +75,20 @@ class MultiPatientSeeder extends Seeder
             ['name' => 'Dimas Arya',        'gender' => 'male',   'birth' => '1996-07-11', 'address' => 'Jl. Hayam Wuruk No. 4',   'email' => 'dimas.arya@example.com'],
             ['name' => 'Nurul Aini',        'gender' => 'female', 'birth' => '1989-03-27', 'address' => 'Jl. Teuku Umar No. 16',   'email' => 'nurul.aini@example.com'],
             ['name' => 'Fajar Setiawan',    'gender' => 'male',   'birth' => '1998-11-19', 'address' => 'Jl. Trunojoyo No. 13',    'email' => 'fajar.setiawan@example.com'],
-            ['name' => 'Maya Indah',        'gender' => 'female', 'birth' => '1993-06-06', 'address' => 'Jl. Lombok No. 18',       'email' => 'maya.indah@example.com'],
-            ['name' => 'Agus Triono',       'gender' => 'male',   'birth' => '1986-01-23', 'address' => 'Jl. Bali No. 20',         'email' => 'agus.triono@example.com'],
-            ['name' => 'Lia Permata',       'gender' => 'female', 'birth' => '2001-09-08', 'address' => 'Jl. Flores No. 15',       'email' => 'lia.permata@example.com'],
-            ['name' => 'Bagas Nugroho',     'gender' => 'male',   'birth' => '1990-04-16', 'address' => 'Jl. Sulawesi No. 12',     'email' => 'bagas.nugroho@example.com'],
-            ['name' => 'Salma Azzahra',     'gender' => 'female', 'birth' => '1997-08-31', 'address' => 'Jl. Kalimantan No. 17',   'email' => 'salma.azzahra@example.com'],
         ];
 
-        // Status konsultasi yang akan di-rotate
-        $statuses = ['pending', 'scheduled', 'done', 'cancelled'];
+        // -------------------------------------------------------
+        // BAGIAN 1: Isi kuota hari ini (6 Juli 2026) — 15 pasien
+        // -------------------------------------------------------
+        $today = '2026-07-06';
+        $times = ['08:00:00', '08:30:00', '09:00:00', '09:30:00', '10:00:00',
+                  '10:30:00', '11:00:00', '11:30:00', '12:00:00', '13:00:00',
+                  '13:30:00', '14:00:00', '14:30:00', '15:00:00', '15:30:00'];
 
         foreach ($patientData as $idx => $data) {
+            $queueNo  = $idx + 1; // 1 – 15
             $username = 'patient_' . str_pad($idx + 2, 2, '0', STR_PAD_LEFT);
 
-            // Buat user
             $user = User::create([
                 'username' => $username,
                 'email'    => $data['email'],
@@ -85,7 +96,6 @@ class MultiPatientSeeder extends Seeder
                 'role'     => 'patient',
             ]);
 
-            // Buat profil pasien
             $patient = Patient::create([
                 'user_id'    => $user->id,
                 'name'       => $data['name'],
@@ -95,58 +105,20 @@ class MultiPatientSeeder extends Seeder
                 'gender'     => $data['gender'],
             ]);
 
-            // Tentukan status konsultasi secara bergilir
-            $status = $statuses[$idx % count($statuses)];
-
             $consultationData = [
-                'patient_id' => $patient->id,
-                'doctor_id'  => $doctor->id,
-                'complaint'  => $complaints[$idx % count($complaints)],
-                'status'     => $status,
-                'created_at' => Carbon::now()->subDays(rand(1, 30)),
+                'patient_id'     => $patient->id,
+                'doctor_id'      => $doctor->id,
+                'complaint'      => $complaints[$idx % count($complaints)],
+                'status'         => 'scheduled',
+                'scheduled_date' => $today,
+                'scheduled_time' => $times[$idx],
+                'queue_number'   => $queueNo,
+                'created_at'     => Carbon::parse($today)->subDays(rand(1, 5)),
             ];
 
-            if ($status === 'scheduled') {
-                $consultationData['scheduled_date'] = Carbon::now()->addDays(rand(1, 14))->toDateString();
-                $consultationData['scheduled_time'] = sprintf('%02d:00:00', rand(8, 16));
-            }
-
-            if ($status === 'done') {
-                $consultationData['scheduled_date'] = Carbon::now()->subDays(rand(1, 15))->toDateString();
-                $consultationData['scheduled_time'] = '10:00:00';
-                $consultationData['notes'] = 'Pasien kooperatif selama pemeriksaan otoskopi berlangsung.';
-            }
-
-            if ($status === 'cancelled') {
-                $consultationData['notes'] = 'Pembatalan oleh pasien.';
-            }
-
-            $consultation = ConsultationRequest::create($consultationData);
-
-            // Buat diagnosis untuk konsultasi yang sudah selesai
-            if ($status === 'done') {
-                $diagResult = $diagnosesList[$idx % count($diagnosesList)];
-
-                $diagnosis = Diagnosis::create([
-                    'consultation_request_id' => $consultation->id,
-                    'diagnosis_result'        => $diagResult,
-                    'ai_result'               => $diagResult === 'Normal' ? 'Normal' : 'Abnormal',
-                    'notes'                   => 'Terapi/Saran: Jaga telinga tetap kering, bersihkan secara berkala ke klinik, hindari penggunaan cotton bud berlebih.',
-                    'is_verified'             => true,
-                ]);
-
-                DiagnosisImage::create([
-                    'diagnosis_id'        => $diagnosis->id,
-                    'image_path'          => 'diagnoses/mock_ear_' . ($idx + 1) . '.jpg',
-                    'ai_screening_result' => [
-                        'class'      => $diagResult,
-                        'confidence' => round(0.75 + ($idx * 0.01), 2),
-                        'timestamp'  => Carbon::now()->subDays($idx + 1)->toIso8601String(),
-                    ],
-                ]);
-            }
+            ConsultationRequest::create($consultationData);
         }
 
-        $this->command->info('✅ MultiPatientSeeder: 20 pasien berhasil dibuat, semua konsul ke ' . $doctor->name . '.');
+        $this->command->info('✅ MultiPatientSeeder: 15 pasien berhasil dibuat dengan antrean 1–15 di tanggal ' . $today . ' untuk dr. ' . $doctor->name . '.');
     }
 }

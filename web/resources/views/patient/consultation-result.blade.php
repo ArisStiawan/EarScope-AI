@@ -48,7 +48,7 @@
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 @if($consultation->scheduled_date)
                                                     <div class="font-medium text-gray-800">{{ \Carbon\Carbon::parse($consultation->scheduled_date)->format('d M Y') }}</div>
-                                                    <div class="text-xs text-gray-400">{{ $consultation->scheduled_time ?? '' }}</div>
+                                                    <div class="text-xs text-indigo-600 font-bold">Antrean: {{ $consultation->queue_number ?? '-' }}</div>
                                                 @else
                                                     <span class="text-xs text-gray-400">-</span>
                                                 @endif
@@ -175,8 +175,8 @@
                                         <p class="mt-1 text-sm text-gray-900">${data.scheduled_date}</p>
                                     </div>
                                     <div>
-                                        <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Scheduled Time</p>
-                                        <p class="mt-1 text-sm text-gray-900">${data.scheduled_time}</p>
+                                        <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Antrean</p>
+                                        <p class="mt-1 text-sm text-gray-900">${data.queue_number ?? '-'}</p>
                                     </div>
                                     ` : ''}
                                 </div>
