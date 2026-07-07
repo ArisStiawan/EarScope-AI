@@ -137,7 +137,13 @@
                                         </div>
                                         <div>
                                             <p class="font-bold text-gray-900 text-lg">dr. {{ $activeConsultation->doctor->name ?? '-' }}</p>
-                                            <p class="text-sm text-gray-500">{{ $activeConsultation->doctor->user->email ?? '-' }}</p>
+                                            <p class="text-sm text-gray-500">
+                                                @if($activeConsultation->doctor->practice_start_time && $activeConsultation->doctor->practice_end_time)
+                                                    Jam Praktik: {{ \Carbon\Carbon::parse($activeConsultation->doctor->practice_start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($activeConsultation->doctor->practice_end_time)->format('H:i') }} WIB
+                                                @else
+                                                    Jam Praktik: -
+                                                @endif
+                                            </p>
                                         </div>
                                     </div>
                                 </div>

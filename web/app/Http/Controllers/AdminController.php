@@ -147,6 +147,7 @@ class AdminController extends Controller
     {
         $request->validate([
             'username'            => 'required|unique:users,username',
+            'email'               => 'required|email|unique:users,email',
             'password'            => 'required',
             'name'                => 'required',
             'license_number'      => 'required',
@@ -159,6 +160,7 @@ class AdminController extends Controller
         // buat user
         $user = User::create([
             'username' => $request->username,
+            'email'    => $request->email,
             'password' => Hash::make($request->password),
             'role'     => 'doctor',
         ]);
@@ -196,12 +198,17 @@ class AdminController extends Controller
         $doctor = Doctor::findOrFail($doctor);
 
         $request->validate([
+            'email'               => 'required|email|unique:users,email,' . $doctor->user->id,
             'name'                => 'required',
             'license_number'      => 'required',
             'gender'              => 'required|in:male,female',
             'practice_start_time' => 'nullable|date_format:H:i',
             'practice_end_time'   => 'nullable|date_format:H:i',
             'patient_quota'       => 'nullable|integer|min:0',
+        ]);
+
+        $doctor->user->update([
+            'email' => $request->email,
         ]);
 
         $doctor->fill([

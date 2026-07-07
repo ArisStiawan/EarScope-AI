@@ -22,7 +22,7 @@ class AutoCancelExpiredConsultations extends Command
      *
      * @var string
      */
-    protected $description = 'Automatically cancel consultations whose scheduled date has passed without a diagnosis';
+    protected $description = 'Automatically cancel consultations that have passed the doctor\'s practice end time without a diagnosis';
 
     /**
      * Execute the console command.
@@ -30,23 +30,47 @@ class AutoCancelExpiredConsultations extends Command
     public function handle()
     {
         $cancelled_count = 0;
+        $now   = Carbon::now();
         $today = Carbon::today();
 
         /**
          * Cari semua konsultasi dengan status 'scheduled' yang:
          * 1. Belum memiliki diagnosis
-         * 2. Tanggal jadwal sudah terlewat (scheduled_date < hari ini)
-         *
-         * Artinya: jika jadwal = 18 Juni dan hari ini sudah 19 Juni ke atas,
-         * maka konsultasi otomatis dibatalkan karena tidak ada diagnosis.
+         * 2. Tanggal jadwal sudah terlewat (hari sebelumnya), ATAU
+         *    tanggal jadwal = hari ini DAN jam sekarang sudah melewati
+         *    jam selesai praktik dokter yang bersangkutan
          */
         $consultations = ConsultationRequest::where('status', 'scheduled')
             ->whereDoesntHave('diagnosis')
             ->whereNotNull('scheduled_date')
-            ->whereDate('scheduled_date', '<', $today)
+            ->with('doctor')
+            ->whereDate('scheduled_date', '<=', $today)
             ->get();
 
         foreach ($consultations as $consultation) {
+            $scheduledDate = Carbon::parse($consultation->scheduled_date)->toDateString();
+            $isToday       = $scheduledDate === $today->toDateString();
+
+            if ($isToday) {
+                // Jika jadwal = hari ini, cancel hanya jika sudah lewat jam selesai praktik dokter
+                $doctor           = $consultation->doctor;
+                $practiceEndTime  = $doctor?->practice_end_time;
+
+                if (!$practiceEndTime) {
+                    // Jika jam praktik tidak diatur, skip (tidak di-cancel hari ini)
+                    continue;
+                }
+
+                // Gabungkan tanggal hari ini dengan jam selesai praktik
+                $endDateTime = Carbon::parse($today->toDateString() . ' ' . $practiceEndTime);
+
+                if ($now->lessThan($endDateTime)) {
+                    // Jam praktik belum selesai → skip, belum waktunya di-cancel
+                    continue;
+                }
+            }
+
+            // Tanggal sudah lewat (kemarin/sebelumnya), ATAU hari ini tapi jam praktik sudah selesai
             $consultation->update(['status' => 'cancelled']);
 
             // Log auto-pembatalan

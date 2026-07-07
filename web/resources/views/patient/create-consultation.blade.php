@@ -73,7 +73,12 @@
                                     @foreach($doctors as $doctor)
                                         <option value="{{ $doctor->id }}"
                                             {{ old('doctor_id') == $doctor->id ? 'selected' : '' }}>
-                                            dr. {{ $doctor->name }} — {{ $doctor->specialization ?? 'General' }}
+                                            dr. {{ $doctor->name }} - 
+                                            @if($doctor->practice_start_time && $doctor->practice_end_time)
+                                                ({{ \Carbon\Carbon::parse($doctor->practice_start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($doctor->practice_end_time)->format('H:i') }})
+                                            @else
+                                                (Jam Praktik Belum Diatur)
+                                            @endif
                                         </option>
                                     @endforeach
                                 </select>

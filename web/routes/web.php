@@ -77,6 +77,7 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware(['role:patient'])->group(function () {
         Route::get('/patient/dashboard', [PatientController::class, 'dashboard'])->name('patient.dashboard');
+        Route::get('/patient/consultation-requests', [PatientController::class, 'consultationRequests'])->name('patient.consultation-requests');
         Route::get('/patient/create-consultation', [PatientController::class, 'createConsultation'])->name('patient.create-consultation');
         Route::post('/patient/store-consultation', [PatientController::class, 'storeConsultation'])->name('patient.store-consultation');
         Route::get('/patient/consultation-results', [PatientController::class, 'consultationResults'])->name('patient.consultation.results');

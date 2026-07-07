@@ -45,12 +45,47 @@ class PatientController extends Controller
         $patient = auth()->user()->patient;
         $hasActive = $patient->consultations()->whereIn('status', ['pending', 'scheduled'])->exists();
         if ($hasActive) {
-            return redirect()->route('patient.dashboard')
-                ->with('error', 'Anda masih memiliki konsultasi yang sedang berjalan.');
+            return redirect()->route('patient.consultation-requests');
         }
 
         $doctors = Doctor::all();
         return view('patient.create-consultation', compact('doctors'));
+    }
+
+    public function consultationRequests(Request $request)
+    {
+        $patient = auth()->user()->patient;
+        $status  = $request->get('status', 'all');
+
+        $perPage = $request->input('per_page', 10);
+        if (!in_array($perPage, [5, 10, 15])) {
+            $perPage = 10;
+        }
+
+        $query = $patient->consultations()->with('doctor');
+
+        if ($status !== 'all') {
+            $query->where('status', $status)->latest();
+        } else {
+            // Urutan: pending → scheduled → cancelled → done
+            $query->orderByRaw("CASE
+                    WHEN status = 'pending'   THEN 0
+                    WHEN status = 'scheduled' THEN 1
+                    WHEN status = 'cancelled' THEN 2
+                    WHEN status = 'done'      THEN 3
+                    ELSE 4
+                END")
+                ->orderBy('created_at', 'desc');
+        }
+
+        $consultations = $query->paginate($perPage);
+
+        // Cek apakah pasien boleh buat konsultasi baru
+        $hasActive = $patient->consultations()
+            ->whereIn('status', ['pending', 'scheduled'])
+            ->exists();
+
+        return view('patient.consultation-requests', compact('consultations', 'status', 'perPage', 'hasActive'));
     }
 
     public function storeConsultation(Request $request)
@@ -141,6 +176,12 @@ class PatientController extends Controller
                 'id'             => $consultation->doctor->id,
                 'name'           => $consultation->doctor->name,
                 'email'          => $consultation->doctor->user->email ?? 'N/A',
+                'practice_hours' => ($consultation->doctor->practice_start_time && $consultation->doctor->practice_end_time)
+                    ? \Carbon\Carbon::parse($consultation->doctor->practice_start_time)->format('H:i')
+                      . ' - '
+                      . \Carbon\Carbon::parse($consultation->doctor->practice_end_time)->format('H:i')
+                      . ' WIB'
+                    : '-',
             ] : null,
             'diagnosis' => $diagnosisData,
         ]);
