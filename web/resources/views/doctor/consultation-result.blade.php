@@ -40,7 +40,8 @@
                                         <tr class="hover:bg-gray-50 transition">
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ ($consultations->currentPage() - 1) * $consultations->perPage() + $i + 1 }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                {{ $consultation->patient->name ?? '-' }}
+                                                <span class="font-bold">{{ $consultation->patient->name ?? '-' }}</span><br>
+                                                <span class="text-xs text-indigo-600 font-bold bg-indigo-50 px-1 py-0.5 rounded">RM: {{ $consultation->patient->medical_record_number ?? '-' }}</span>
                                             </td>
                                             <td class="px-6 py-4 text-sm text-gray-700 max-w-xs">
                                                 {{ Str::limit($consultation->complaint, 60) }}
@@ -48,7 +49,7 @@
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 @if($consultation->scheduled_date)
                                                     <div class="font-medium text-gray-800">{{ \Carbon\Carbon::parse($consultation->scheduled_date)->format('d M Y') }}</div>
-                                                    <div class="text-xs text-gray-400">{{ $consultation->scheduled_time ?? '' }}</div>
+                                                    <div class="text-xs text-indigo-600 font-bold">Antrean: {{ $consultation->queue_number ?? '-' }}</div>
                                                 @else
                                                     <span class="text-xs text-gray-400">-</span>
                                                 @endif
@@ -140,6 +141,10 @@
                                         <p class="mt-1 text-sm text-gray-900">${data.patient?.name ?? '-'}</p>
                                     </div>
                                     <div>
+                                        <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">No. RM</p>
+                                        <p class="mt-1 text-sm font-bold text-indigo-600">${data.patient?.medical_record_number ?? '-'}</p>
+                                    </div>
+                                    <div>
                                         <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Email</p>
                                         <p class="mt-1 text-sm text-gray-900">${data.patient?.email ?? '-'}</p>
                                     </div>
@@ -183,8 +188,8 @@
                                         <p class="mt-1 text-sm text-gray-900">${data.scheduled_date}</p>
                                     </div>
                                     <div>
-                                        <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Waktu Jadwal</p>
-                                        <p class="mt-1 text-sm text-gray-900">${data.scheduled_time}</p>
+                                        <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Antrean</p>
+                                        <p class="mt-1 text-sm text-gray-900">${data.queue_number ?? '-'}</p>
                                     </div>
                                     ` : ''}
                                 </div>

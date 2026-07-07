@@ -96,7 +96,7 @@
                                     <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient</th>
                                     <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Complaint</th>
                                     <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Scheduled Date</th>
-                                    <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+                                    <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Antrean</th>
                                     <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                                 </tr>
                             </thead>
@@ -114,7 +114,7 @@
                                             {{ \Carbon\Carbon::parse($consultation->scheduled_date)->format('d M Y') }}
                                         </td>
                                         <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
-                                            {{ $consultation->scheduled_time ?? '-' }}
+                                            {{ $consultation->queue_number ?? '-' }}
                                         </td>
                                         <td class="px-6 py-4">
                                             @php

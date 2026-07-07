@@ -47,19 +47,38 @@
         @enderror
     </div>
 
-    <!-- Specialization -->
+    <!-- Practice Hours -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+            <label for="practice_start_time" class="block text-sm font-medium text-gray-700">Jam Mulai Praktik</label>
+            <input type="time" id="practice_start_time" name="practice_start_time" value="{{ old('practice_start_time', (isset($doctor->practice_start_time) ? \Carbon\Carbon::parse($doctor->practice_start_time)->format('H:i') : '')) }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 border focus:border-blue-500 focus:ring-blue-500" />
+            @error('practice_start_time')
+                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+            @enderror
+        </div>
+        <div>
+            <label for="practice_end_time" class="block text-sm font-medium text-gray-700">Jam Selesai Praktik</label>
+            <input type="time" id="practice_end_time" name="practice_end_time" value="{{ old('practice_end_time', (isset($doctor->practice_end_time) ? \Carbon\Carbon::parse($doctor->practice_end_time)->format('H:i') : '')) }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 border focus:border-blue-500 focus:ring-blue-500" />
+            @error('practice_end_time')
+                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+            @enderror
+        </div>
+    </div>
+
+    <!-- Kuota Pasien -->
     <div>
-        <label for="specialization" class="block text-sm font-medium text-gray-700">Specialization</label>
-        <select id="specialization" name="specialization" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 border focus:border-blue-500 focus:ring-blue-500">
-            <option value="">-- Select Specialization --</option>
-            <option value="General" @selected(old('specialization', $doctor->specialization ?? '') === 'General')>General</option>
-            <option value="Dentistry" @selected(old('specialization', $doctor->specialization ?? '') === 'Dentistry')>Dentistry</option>
-            <option value="Pediatrics" @selected(old('specialization', $doctor->specialization ?? '') === 'Pediatrics')>Pediatrics</option>
-            <option value="Obstetrics" @selected(old('specialization', $doctor->specialization ?? '') === 'Obstetrics')>Obstetrics</option>
-            <option value="Cardiology" @selected(old('specialization', $doctor->specialization ?? '') === 'Cardiology')>Cardiology</option>
-            <option value="Neurology" @selected(old('specialization', $doctor->specialization ?? '') === 'Neurology')>Neurology</option>
-        </select>
-        @error('specialization')
+        <label for="patient_quota" class="block text-sm font-medium text-gray-700">Kuota Pasien / Hari</label>
+        <input type="number" id="patient_quota" name="patient_quota" min="0"
+            value="{{ old('patient_quota', $doctor->patient_quota ?? '') }}"
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 border focus:border-blue-500 focus:ring-blue-500"
+            placeholder="Kosongkan untuk hitung otomatis dari jam praktik" />
+        <p class="mt-1 text-xs text-gray-500">
+            Jika dikosongkan, kuota dihitung otomatis: <strong>3 pasien × jumlah jam praktik</strong>.
+            @if(isset($doctor) && $doctor->practice_start_time && $doctor->practice_end_time)
+                Estimasi otomatis: <strong>{{ $doctor->patient_quota }} pasien</strong>.
+            @endif
+        </p>
+        @error('patient_quota')
             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
         @enderror
     </div>

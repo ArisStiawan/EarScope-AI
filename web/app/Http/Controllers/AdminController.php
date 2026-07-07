@@ -146,27 +146,40 @@ class AdminController extends Controller
     public function storeDoctor(Request $request)
     {
         $request->validate([
-            'username' => 'required|unique:users,username',
-            'password' => 'required',
-            'name' => 'required',
-            'license_number' => 'required',
-            'gender' => 'required|in:male,female',
+            'username'            => 'required|unique:users,username',
+            'password'            => 'required',
+            'name'                => 'required',
+            'license_number'      => 'required',
+            'gender'              => 'required|in:male,female',
+            'practice_start_time' => 'nullable|date_format:H:i',
+            'practice_end_time'   => 'nullable|date_format:H:i',
+            'patient_quota'       => 'nullable|integer|min:0',
         ]);
 
         // buat user
         $user = User::create([
             'username' => $request->username,
             'password' => Hash::make($request->password),
-            'role' => 'doctor',
+            'role'     => 'doctor',
         ]);
 
         // buat doctor
-        Doctor::create([
-            'user_id' => $user->id,
-            'name' => $request->name,
-            'license_number' => $request->license_number,
-            'gender' => $request->gender,
+        $doctor = new Doctor([
+            'user_id'             => $user->id,
+            'name'                => $request->name,
+            'license_number'      => $request->license_number,
+            'gender'              => $request->gender,
+            'practice_start_time' => $request->practice_start_time,
+            'practice_end_time'   => $request->practice_end_time,
         ]);
+
+        // Jika admin mengisi kuota manual, tandai agar boot tidak override
+        if ($request->filled('patient_quota')) {
+            $doctor->manual_quota = true;
+            $doctor->patient_quota = (int) $request->patient_quota;
+        }
+
+        $doctor->save();
 
         return redirect()->route('admin.doctors.index')->with('success', 'Doctor berhasil ditambahkan');
     }
@@ -183,16 +196,29 @@ class AdminController extends Controller
         $doctor = Doctor::findOrFail($doctor);
 
         $request->validate([
-            'name' => 'required',
-            'license_number' => 'required',
-            'gender' => 'required|in:male,female',
+            'name'                => 'required',
+            'license_number'      => 'required',
+            'gender'              => 'required|in:male,female',
+            'practice_start_time' => 'nullable|date_format:H:i',
+            'practice_end_time'   => 'nullable|date_format:H:i',
+            'patient_quota'       => 'nullable|integer|min:0',
         ]);
 
-        $doctor->update([
-            'name' => $request->name,
-            'license_number' => $request->license_number,
-            'gender' => $request->gender,
+        $doctor->fill([
+            'name'                => $request->name,
+            'license_number'      => $request->license_number,
+            'gender'              => $request->gender,
+            'practice_start_time' => $request->practice_start_time,
+            'practice_end_time'   => $request->practice_end_time,
         ]);
+
+        // Jika admin mengisi kuota manual, tandai agar boot tidak override
+        if ($request->filled('patient_quota')) {
+            $doctor->manual_quota = true;
+            $doctor->patient_quota = (int) $request->patient_quota;
+        }
+
+        $doctor->save();
 
         return redirect()->route('admin.doctors.index')
             ->with('success', 'Dokter berhasil diupdate');

@@ -32,11 +32,6 @@
                         <small class="text-gray-500">Today or later</small>
                     </div>
 
-                    <div>
-                        <label for="scheduledTime" class="block text-sm font-medium text-gray-700">Scheduled Time</label>
-                        <input type="time" id="scheduledTime" name="scheduled_time" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                    </div>
-
                     <div id="scheduleError" class="hidden">
                         <div class="rounded-md bg-red-50 p-4">
                             <p class="text-sm font-medium text-red-800" id="scheduleErrorText"></p>
@@ -95,9 +90,8 @@
     function submitSchedule() {
         let consultationId = $('#consultationId').val();
         let scheduledDate = $('#scheduledDate').val();
-        let scheduledTime = $('#scheduledTime').val();
 
-        if (!scheduledDate || !scheduledTime) {
+        if (!scheduledDate) {
             showScheduleError('Please fill in all fields');
             return;
         }
@@ -110,30 +104,15 @@
             type: 'POST',
             data: {
                 _token: $('[name="_token"]').val(),
-                scheduled_date: scheduledDate,
-                scheduled_time: scheduledTime
+                scheduled_date: scheduledDate
             },
             success: function(response) {
                 showScheduleSuccess('Consultation scheduled successfully!');
 
-                // Update status badge
-                let statusBadge = $('#status-' + consultationId);
-                statusBadge.removeClass('bg-yellow-100 text-yellow-800 bg-red-100 text-red-800')
-                           .addClass('bg-green-100 text-green-800').text('Scheduled');
-
-                // Update scheduled date cell
-                let row = $('#row-' + consultationId);
-                let schedCell = row.find('td').eq(4); // column index 4 = Scheduled
-                let dateFormatted = new Date(scheduledDate).toLocaleDateString('en-US', {day:'2-digit', month:'short', year:'numeric'});
-                schedCell.html('<span class="font-medium text-gray-800">' + dateFormatted + '</span><br><span class="text-xs text-gray-400">' + scheduledTime + '</span>');
-
-                // Replace action buttons: remove Approve/Reject, keep View + Schedule
-                let actionsCell = row.find('td:last');
-                actionsCell.html('<button type="button" onclick="openDetailModal(' + consultationId + ')" class="text-indigo-600 hover:text-indigo-900 underline">View</button> <button type="button" onclick="openScheduleModal(' + consultationId + ', false)" class="text-blue-600 hover:text-blue-900 underline">Reschedule</button>');
-
                 setTimeout(function() {
                     closeScheduleModal();
-                }, 1800);
+                    location.reload();
+                }, 1500);
             },
             error: function(xhr) {
                 let errorMessage = 'An error occurred';

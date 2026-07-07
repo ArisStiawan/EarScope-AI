@@ -38,7 +38,9 @@ class UserSeeder extends Seeder
             'user_id' => $doctorUser->id,
             'name' => 'Dr. John Doe',
             'license_number' => 'STR-01',
-            'gender' => 'male'
+            'gender' => 'male',
+            'practice_start_time' => '07:00',
+            'practice_end_time' => '12:00'
         ]);
 
         // =====================
@@ -106,7 +108,7 @@ class UserSeeder extends Seeder
                 'complaint' => $complaints[($i + 4) % count($complaints)] . " (Jadwal #$i)",
                 'status' => 'scheduled',
                 'scheduled_date' => $scheduledDate->toDateString(),
-                'scheduled_time' => sprintf('%02d:00:00', 9 + $i),
+                'queue_number' => $i,
                 'created_at' => Carbon::now()->subDays($i + 5),
             ]);
         }
@@ -132,7 +134,7 @@ class UserSeeder extends Seeder
                 'status' => 'done',
                 'notes' => 'Pasien kooperatif selama pemeriksaan otoskopi berlangsung.',
                 'scheduled_date' => Carbon::now()->subDays($i + 2)->toDateString(),
-                'scheduled_time' => '10:00:00',
+                'queue_number' => 1,
                 'created_at' => Carbon::now()->subDays($i + 15),
             ]);
 

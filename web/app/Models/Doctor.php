@@ -10,8 +10,41 @@ class Doctor extends Model
         'user_id',
         'name',
         'license_number',
-        'gender'
+        'gender',
+        'practice_start_time',
+        'practice_end_time',
+        'patient_quota'
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::saving(function ($doctor) {
+            // Skip auto-calc jika admin mengisi kuota secara manual
+            if (!empty($doctor->manual_quota)) {
+                return;
+            }
+
+            if ($doctor->practice_start_time && $doctor->practice_end_time) {
+                $start = \Carbon\Carbon::parse($doctor->practice_start_time);
+                $end   = \Carbon\Carbon::parse($doctor->practice_end_time);
+
+                // If end time is next day (e.g. 23:00 to 02:00)
+                if ($end->lessThan($start)) {
+                    $end->addDay();
+                }
+
+                $diffInMinutes = $start->diffInMinutes($end);
+                $hours = $diffInMinutes / 60;
+
+                // Calculate quota based on 3 patients per hour (dibulatkan ke bawah)
+                $doctor->patient_quota = floor($hours * 3);
+            } else {
+                $doctor->patient_quota = 0;
+            }
+        });
+    }
 
     public function user()
     {
