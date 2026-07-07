@@ -224,6 +224,31 @@
                                         ${d.is_verified ? 'Verified' : 'Not Verified'}
                                     </span>
                                 </div>
+
+                                ${(d.raw_video_url || d.processed_video_url) ? `
+                                    <div class="mt-4 space-y-4">
+                                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Video Pemeriksaan Earscope</p>
+                                        ${d.raw_video_url ? `
+                                            <div class="rounded-xl overflow-hidden border border-slate-200 bg-black">
+                                                <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-3 pt-2 pb-1 bg-slate-900">Raw Video (Tanpa Deteksi)</p>
+                                                <video controls class="w-full" style="max-height:260px;" preload="metadata">
+                                                    <source src="${d.raw_video_url}" type="video/mp4">
+                                                    Browser Anda tidak mendukung pemutaran video.
+                                                </video>
+                                            </div>
+                                        ` : ''}
+                                        ${d.processed_video_url ? `
+                                            <div class="rounded-xl overflow-hidden border border-teal-200 bg-black">
+                                                <p class="text-[10px] font-semibold text-teal-400 uppercase tracking-wider px-3 pt-2 pb-1 bg-slate-900">Processed Video (Deteksi YOLO AI)</p>
+                                                <video controls class="w-full" style="max-height:260px;" preload="metadata">
+                                                    <source src="${d.processed_video_url}" type="video/mp4">
+                                                    Browser Anda tidak mendukung pemutaran video.
+                                                </video>
+                                            </div>
+                                        ` : ''}
+                                    </div>
+                                ` : ''}
+
                                 ${imagesHtml ? `
                                     <div class="grid grid-cols-2 gap-3 mt-3">${imagesHtml}</div>
                                 ` : ''}

@@ -15,6 +15,8 @@ class Diagnosis extends Model
         'ai_result',
         'raw_video_path',
         'processed_video_path',
+        'raw_video_url',
+        'processed_video_url',
     ];
 
     public function consultationRequest()
