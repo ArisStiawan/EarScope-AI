@@ -9,10 +9,56 @@ use App\Models\DiagnosisImage;
 use App\Models\ConsultationRequest;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\URL;
+use Cloudinary\Cloudinary;
+use Cloudinary\Configuration\Configuration;
 
 class EarscopeApiController extends Controller
 {
+    /**
+     * Inisialisasi Cloudinary SDK dengan konfigurasi dari .env
+     */
+    private function getCloudinary(): Cloudinary
+    {
+        return new Cloudinary(
+            Configuration::instance([
+                'cloud' => [
+                    'cloud_name' => env('CLOUDINARY_CLOUD_NAME'),
+                    'api_key'    => env('CLOUDINARY_API_KEY'),
+                    'api_secret' => env('CLOUDINARY_API_SECRET'),
+                ],
+                'url' => ['secure' => true],
+            ])
+        );
+    }
+
+    /**
+     * Upload sebuah file video ke Cloudinary.
+     * Mengembalikan secure URL hasil upload, atau null jika gagal.
+     */
+    private function uploadVideoToCloudinary(string $filePath, string $folder): ?string
+    {
+        try {
+            $cloudinary = $this->getCloudinary();
+            $result = $cloudinary->uploadApi()->upload($filePath, [
+                'resource_type' => 'video',
+                'folder'        => $folder,
+                'eager'         => [
+                    // Transcoding otomatis ke H.264 agar kompatibel dengan browser
+                    ['format' => 'mp4', 'video_codec' => 'h264'],
+                ],
+                'eager_async'  => false, // Tunggu transcoding selesai
+            ]);
+
+            $url = $result['secure_url'] ?? null;
+            Log::info('[Cloudinary] Upload sukses', ['url' => $url, 'folder' => $folder]);
+            return $url;
+
+        } catch (\Exception $e) {
+            Log::error('[Cloudinary] Upload gagal: ' . $e->getMessage(), ['folder' => $folder]);
+            return null;
+        }
+    }
+
     /**
      * Menerima hasil diagnosa dari Flask App (Earscope).
      * Dipanggil secara otomatis setelah stop recording di perangkat earscope.
@@ -49,18 +95,32 @@ class EarscopeApiController extends Controller
             ], 422);
         }
 
-        // --- Simpan video ke storage permanen ---
-        $rawPath       = null;
-        $processedPath = null;
+        // --- Upload video ke Cloudinary ---
+        $rawVideoUrl       = null;
+        $processedVideoUrl = null;
+        $rawPath           = null;
+        $processedPath     = null;
 
         if ($request->hasFile('raw_video')) {
-            $rawPath = $request->file('raw_video')
-                ->store("earscope_videos/{$consultationId}/raw", 'public');
+            $file        = $request->file('raw_video');
+            $folder      = "earscope/{$consultationId}/raw";
+
+            // Upload ke Cloudinary
+            $rawVideoUrl = $this->uploadVideoToCloudinary($file->getRealPath(), $folder);
+
+            // Simpan juga ke storage lokal sebagai backup
+            $rawPath = $file->store("earscope_videos/{$consultationId}/raw", 'public');
         }
 
         if ($request->hasFile('processed_video')) {
-            $processedPath = $request->file('processed_video')
-                ->store("earscope_videos/{$consultationId}/processed", 'public');
+            $file        = $request->file('processed_video');
+            $folder      = "earscope/{$consultationId}/processed";
+
+            // Upload ke Cloudinary
+            $processedVideoUrl = $this->uploadVideoToCloudinary($file->getRealPath(), $folder);
+
+            // Simpan juga ke storage lokal sebagai backup
+            $processedPath = $file->store("earscope_videos/{$consultationId}/processed", 'public');
         }
 
         // --- Buat atau update record Diagnosis ---
@@ -70,13 +130,19 @@ class EarscopeApiController extends Controller
                 'ai_result'             => $hasilDiagnosis,
                 'raw_video_path'        => $rawPath,
                 'processed_video_path'  => $processedPath,
+                'raw_video_url'         => $rawVideoUrl,
+                'processed_video_url'   => $processedVideoUrl,
                 // Isi diagnosis_result dengan ai_result sebagai default agar field not-null terpenuhi.
                 // Dokter masih bisa mengedit/menimpa lewat form web.
                 'diagnosis_result'      => $hasilDiagnosis,
             ]
         );
 
-        Log::info('[Earscope API] Diagnosis saved', ['diagnosis_id' => $diagnosis->id]);
+        Log::info('[Earscope API] Diagnosis saved', [
+            'diagnosis_id'      => $diagnosis->id,
+            'raw_video_url'     => $rawVideoUrl ?? '(tidak ada)',
+            'processed_video_url' => $processedVideoUrl ?? '(tidak ada)',
+        ]);
 
         return response()->json([
             'success'      => true,
@@ -121,7 +187,7 @@ class EarscopeApiController extends Controller
 
         $savedImages = [];
 
-        // Simpan raw image
+        // Simpan raw image (foto tetap di storage lokal — JPG sudah kompatibel browser)
         if ($request->hasFile('raw_image')) {
             $rawPath = $request->file('raw_image')
                 ->store("earscope_photos/{$consultationId}/raw", 'public');
@@ -203,12 +269,11 @@ class EarscopeApiController extends Controller
         return response()->json([
             'success'             => true,
             'ai_result'           => $diagnosis->ai_result,
-            'raw_video_url'       => $diagnosis->raw_video_path
-                ? Storage::disk('public')->url($diagnosis->raw_video_path)
-                : null,
-            'processed_video_url' => $diagnosis->processed_video_path
-                ? Storage::disk('public')->url($diagnosis->processed_video_path)
-                : null,
+            // Prioritaskan URL Cloudinary; fallback ke storage lokal jika belum ada
+            'raw_video_url'       => $diagnosis->raw_video_url
+                ?? ($diagnosis->raw_video_path ? Storage::disk('public')->url($diagnosis->raw_video_path) : null),
+            'processed_video_url' => $diagnosis->processed_video_url
+                ?? ($diagnosis->processed_video_path ? Storage::disk('public')->url($diagnosis->processed_video_path) : null),
             'photos'              => $diagnosis->images->map(fn($img) => [
                 'id'                  => $img->id,
                 'image_url'           => Storage::disk('public')->url($img->image_path),
