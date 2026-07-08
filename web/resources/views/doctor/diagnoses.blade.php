@@ -22,16 +22,20 @@
                     <p class="text-gray-500">No scheduled consultations available for diagnosis.</p>
                 @else
                     <div class="mb-4">
-                        <div class="flex items-center gap-3">
-                            <input id="searchConsultations" type="text" placeholder="Search patient, complaint, or date..."
-                                class="block w-full md:w-96 px-3 py-2 border rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm" />
-                            <button type="button" onclick="clearSearch()"
-                                class="ml-2 inline-flex items-center px-3 py-2 bg-gray-100 text-sm rounded-md hover:bg-gray-200">Clear</button>
-                        </div>
+                        <form method="GET" action="{{ route('doctor.diagnoses') }}" class="flex items-center gap-3">
+                            <input id="searchConsultations" name="search" type="text" value="{{ request('search') }}" placeholder="Search patient, complaint, or date..."
+                                class="block w-full md:w-96 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-teal-500 focus:border-teal-500 text-sm" />
+                            <button type="submit"
+                                class="inline-flex items-center px-4 py-2 bg-teal-600 text-white text-sm font-medium rounded-md hover:bg-teal-700 transition">Search</button>
+                            @if(request()->has('search') && request('search') != '')
+                                <a href="{{ route('doctor.diagnoses') }}"
+                                    class="inline-flex items-center px-3 py-2 bg-gray-100 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-200 transition">Clear</a>
+                            @endif
+                        </form>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         @foreach($consultations as $consultation)
-                            <div class="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow p-5 flex flex-col justify-between">
+                            <div class="consultation-card bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow p-5 flex flex-col justify-between">
                                 <div>
                                     <div class="flex items-center justify-between mb-3">
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
@@ -513,25 +517,7 @@
             }
         });
 
-        // Client-side search
-        function filterConsultations() {
-            const q = ($('#searchConsultations').val() || '').toLowerCase().trim();
-            if (!q) {
-                $('#consultationsSection table tbody tr').show();
-                return;
-            }
-            $('#consultationsSection table tbody tr').each(function () {
-                $(this).toggle($(this).text().toLowerCase().indexOf(q) !== -1);
-            });
-        }
 
-        $(document).on('input', '#searchConsultations', filterConsultations);
-
-        function clearSearch() {
-            $('#searchConsultations').val('');
-            filterConsultations();
-            $('#searchConsultations').focus();
-        }
     </script>
 
     <style>

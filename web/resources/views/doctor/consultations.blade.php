@@ -80,15 +80,15 @@
                                                         <span class="font-bold text-slate-800">
                                                             {{ $consultation->patient->name ?? 'N/A' }}
                                                         </span>
-                                                        <div class="flex items-center gap-2 mt-0.5">
-                                                            <span class="text-[10px] text-slate-400 font-semibold">Umur: {{ $consultation->patient->age ?? '-' }} Tahun</span>
+                                                        <div class="grid items-center gap-2 mt-0.5">
                                                             <span class="text-[10px] text-indigo-500 font-bold bg-indigo-50 px-1.5 py-0.5 rounded">RM: {{ $consultation->patient->medical_record_number ?? '-' }}</span>
+                                                            <span class="text-[10px] text-slate-400 font-semibold">Umur: {{ $consultation->patient->age ?? '-' }} Tahun</span>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                                                {{ $consultation->patient->email ?? 'N/A' }}
+                                                {{ $consultation->patient->user->email ?? 'N/A' }}
                                             </td>
                                             <td class="px-6 py-4 text-slate-600 font-medium max-w-xs truncate">
                                                 {{ Str::limit($consultation->complaint, 45) }}

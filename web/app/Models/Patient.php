@@ -25,7 +25,7 @@ class Patient extends Model
                 $latestPatient = self::orderBy('id', 'desc')->first();
                 $datePrefix = \Carbon\Carbon::now()->format('Ym');
                 $nextId = $latestPatient ? $latestPatient->id + 1 : 1;
-                $patient->medical_record_number = 'RM-' . $datePrefix . '-' . str_pad($nextId, 3, '0', STR_PAD_LEFT);
+                $patient->medical_record_number = $datePrefix . str_pad($nextId, 4, '0', STR_PAD_LEFT);
             }
         });
     }

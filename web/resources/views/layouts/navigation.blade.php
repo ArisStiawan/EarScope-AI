@@ -47,7 +47,7 @@
                             {{ __('Patients Profile') }}
                         </x-nav-link>
                     @elseif($role === 'patient')
-                        <x-nav-link href="/patient/create-consultation" :active="request()->is('patient/create-consultation*')" class="!text-white">
+                        <x-nav-link href="/patient/consultation-requests" :active="request()->is('patient/consultation-requests*')" class="!text-white">
                             {{ __('Consultation Request') }}
                         </x-nav-link>
                         <x-nav-link href="/patient/consultation-results" :active="request()->is('patient/consultation-results*')" class="!text-white">
@@ -131,7 +131,7 @@
                     {{ __('Patients Profile') }}
                 </x-responsive-nav-link>
             @elseif($role === 'patient')
-                <x-responsive-nav-link href="/patient/create-consultation" :active="request()->is('patient/create-consultation*')" class="!text-white">
+                <x-responsive-nav-link href="/patient/consultation-requests" :active="request()->is('patient/consultation-requests*')" class="!text-white">
                     {{ __('Consultation Request') }}
                 </x-responsive-nav-link>
                 <x-responsive-nav-link href="/patient/diagnoses" :active="request()->is('patient/diagnoses*')" class="!text-white">

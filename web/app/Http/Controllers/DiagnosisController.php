@@ -25,15 +25,31 @@ class DiagnosisController extends Controller
             $perPage = 10;
         }
 
-        $consultations = ConsultationRequest::where('doctor_id', $doctor->id)
+        $search = $request->input('search');
+
+        $query = ConsultationRequest::where('doctor_id', $doctor->id)
             ->where('status', 'scheduled')
             ->whereDoesntHave('diagnosis')
-            ->with('patient')
-            ->orderBy('scheduled_date', 'asc')
-            ->orderBy('queue_number', 'asc')
-            ->paginate($perPage);
+            ->with('patient');
 
-        return view('doctor.diagnoses', compact('consultations', 'perPage'));
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('patient', function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('medical_record_number', 'like', "%{$search}%");
+                })
+                ->orWhere('complaint', 'like', "%{$search}%")
+                ->orWhere('scheduled_date', 'like', "%{$search}%")
+                ->orWhere('queue_number', 'like', "%{$search}%");
+            });
+        }
+
+        $consultations = $query->orderBy('scheduled_date', 'asc')
+            ->orderBy('queue_number', 'asc')
+            ->paginate($perPage)
+            ->withQueryString();
+
+        return view('doctor.diagnoses', compact('consultations', 'perPage', 'search'));
     }
 
     public function store(Request $request)

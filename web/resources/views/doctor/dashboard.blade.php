@@ -167,7 +167,7 @@
                                             {{ $request->patient->name ?? 'N/A' }}
                                         </td>
                                         <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-700">
-                                            {{ $request->patient->email ?? 'N/A' }}
+                                            {{ $request->patient->user->email ?? 'N/A' }}
                                         </td>
                                         <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
                                             {{ Str::limit($request->complaint, 40) }}

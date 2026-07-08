@@ -205,10 +205,9 @@
                             @endif
 
                             <div class="mt-6 flex justify-end">
-                                <button type="button"
-                                    onclick="cancelActiveConsultation('{{ $activeConsultation->id }}')"
-                                    class="inline-flex items-center gap-2 bg-white border border-red-300 text-red-700 hover:bg-red-50 font-medium py-2 px-5 rounded-lg text-sm transition shadow-sm">
-                                    Batalkan Konsultasi
+                                <button type="button" onclick="cancelConsultation('{{ $activeConsultation->id }}')"
+                                        class="inline-flex items-center gap-2 bg-white border border-red-300 text-red-700 hover:bg-red-50 font-medium py-2 px-5 rounded-lg text-sm transition shadow-sm">
+                                        Batalkan Konsultasi
                                 </button>
                             </div>
                         </div>
@@ -218,30 +217,69 @@
             </div>
         </div>
     </div>
+    {{-- Cancel Confirmation Modal --}}
+    <div id="cancelConfirmModal" class="hidden fixed z-[60] inset-0 overflow-y-auto">
+        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20">
+            {{-- Overlay --}}
+            <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onclick="closeCancelModal()"></div>
+
+            {{-- Panel --}}
+            <div class="relative bg-white rounded-2xl shadow-2xl text-left overflow-hidden w-full max-w-sm animate-fade-in-up border border-slate-100">
+                <div class="p-6 text-center">
+                    <div class="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 text-red-500">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-800 mb-2">Batalkan Konsultasi?</h3>
+                    <p class="text-sm text-slate-500 mb-6">Tindakan ini tidak dapat dibatalkan. Antrean Anda akan dihapus.</p>
+                    
+                    <div class="flex gap-3 justify-center">
+                        <button type="button" onclick="closeCancelModal()"
+                            class="px-5 py-2.5 text-sm font-semibold rounded-xl bg-gray-100 text-gray-700 hover:bg-gray-200 transition">
+                            Kembali
+                        </button>
+                        <button type="button" id="confirmCancelBtn"
+                            class="px-5 py-2.5 text-sm font-semibold rounded-xl bg-red-500 text-white hover:bg-red-600 transition shadow-lg shadow-red-500/30">
+                            Ya, Batalkan
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
-        function cancelActiveConsultation(consultationId) {
-            if (!confirm('Are you sure you want to cancel this consultation?')) return;
+        let cancelIdTarget = null;
+
+        function cancelConsultation(consultationId) {
+            cancelIdTarget = consultationId;
+            $('#cancelConfirmModal').removeClass('hidden');
+        }
+
+        function closeCancelModal() {
+            cancelIdTarget = null;
+            $('#cancelConfirmModal').addClass('hidden');
+        }
+
+        $('#confirmCancelBtn').on('click', function() {
+            if (!cancelIdTarget) return;
+            
+            // Loading state
+            const originalText = $(this).text();
+            $(this).prop('disabled', true).html('<svg class="w-5 h-5 animate-spin mx-auto text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>');
 
             $.ajax({
-                url: '/patient/consultation/' + consultationId + '/cancel',
+                url: '/patient/consultation/' + cancelIdTarget + '/cancel',
                 type: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                },
-                success: function(response) {
-                    if (response.success) {
-                        alert('Consultation cancelled successfully.');
-                        location.reload();
-                    } else {
-                        alert(response.message || 'Unable to cancel consultation.');
-                    }
-                },
+                data: { _token: $('meta[name="csrf-token"]').attr('content') },
+                success: function() { location.reload(); },
                 error: function(xhr) {
-                    const response = xhr.responseJSON;
-                    alert(response?.message || 'Failed to cancel consultation.');
+                    alert(xhr.responseJSON?.message || 'Gagal membatalkan konsultasi.');
+                    closeCancelModal();
+                    $('#confirmCancelBtn').prop('disabled', false).text('Ya, Batalkan');
                 }
             });
-        }
+        });
     </script>
 </x-app-layout>

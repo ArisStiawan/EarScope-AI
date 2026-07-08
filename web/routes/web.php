@@ -63,6 +63,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/doctor/diagnoses', [DiagnosisController::class, 'store'])->name('doctor.diagnoses.store');
         Route::delete('/doctor/consultation/{id}/retake', [DiagnosisController::class, 'retake'])->name('doctor.diagnoses.retake');
         Route::get('/doctor/patients-profile', [DoctorController::class, 'patientsProfile'])->name('doctor.patients-profile');
+        Route::get('/doctor/patients-profile/{patientId}/history', [DoctorController::class, 'patientHistory'])->name('doctor.patient.history');
         Route::get('/doctor/consultation/{id}/details', [DoctorController::class, 'getConsultationDetails'])->name('consultation.details');
         Route::post('/doctor/consultation/{id}/approve', [DoctorController::class, 'approve'])->name('consultation.approve');
         Route::post('/doctor/consultation/{id}/reject', [DoctorController::class, 'reject'])->name('consultation.reject');

@@ -416,6 +416,22 @@ class DoctorController extends Controller
         return view('doctor.patients-profile', compact('patients', 'perPage'));
     }
 
+    public function patientHistory(Request $request, $patientId)
+    {
+        $doctor = $this->getDoctor();
+
+        $patient = \App\Models\Patient::with('user')->findOrFail($patientId);
+
+        $consultations = \App\Models\ConsultationRequest::where('doctor_id', $doctor->id)
+            ->where('patient_id', $patientId)
+            ->where('status', 'done')
+            ->with(['diagnosis.images'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('doctor.patient-history', compact('patient', 'consultations', 'doctor'));
+    }
+
     /**
      * Cek apakah Flask earscope sudah berjalan.
      */
