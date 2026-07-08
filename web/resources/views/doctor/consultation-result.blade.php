@@ -111,25 +111,77 @@
                 dataType: 'json',
                 success: function(data) {
                     let statusBadge = getDoctorBadgeClass(data.status);
-                    let diagnosisSection = data.diagnosis ? `
-                        <div class="border-b pb-4">
-                            <h4 class="font-semibold text-gray-900 mb-3">Diagnosis</h4>
-                            <div>
-                                <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Result</p>
-                                <p class="mt-1 text-sm text-gray-900">${data.diagnosis.diagnosis_result ?? '-'}</p>
+                    let diagnosisSection = '';
+                    if (data.diagnosis) {
+                        const d = data.diagnosis;
+                        let imagesHtml = '';
+                        if (d.images && d.images.length > 0) {
+                            imagesHtml = d.images.map(img => `
+                                <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                                    <img src="${img.image_url}" alt="Otoscope" class="w-full h-36 object-cover" />
+                                    ${img.ai_screening_result ? `
+                                        <div class="p-2.5">
+                                            <p class="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">AI Result</p>
+                                            <p class="text-xs font-bold text-gray-700 mt-0.5">${typeof img.ai_screening_result === 'object' ? JSON.stringify(img.ai_screening_result) : img.ai_screening_result}</p>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            `).join('');
+                        }
+
+                        diagnosisSection = `
+                            <div class="border-b pb-4">
+                                <h4 class="font-semibold text-gray-900 mb-3">Diagnosis</h4>
+                                <div>
+                                    <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Result</p>
+                                    <p class="mt-1 text-sm text-gray-900">${d.diagnosis_result ?? '-'}</p>
+                                </div>
+                                ${d.notes ? `
+                                <div class="mt-4">
+                                    <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Notes</p>
+                                    <p class="mt-1 text-sm text-gray-900">${d.notes}</p>
+                                </div>
+                                ` : ''}
+
+                                ${(d.raw_video_url || d.processed_video_url) ? `
+                                    <div class="mt-4 space-y-4">
+                                        <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Video Pemeriksaan Earscope</p>
+                                        ${d.raw_video_url ? `
+                                            <div class="rounded-xl overflow-hidden border border-gray-200 shadow-sm bg-black">
+                                                <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider px-3 pt-2 pb-1 bg-gray-900">Raw Video (Tanpa Deteksi)</p>
+                                                <video controls class="w-full" style="max-height:260px;" preload="metadata">
+                                                    <source src="${d.raw_video_url}" type="video/mp4">
+                                                    Browser Anda tidak mendukung pemutaran video.
+                                                </video>
+                                            </div>
+                                        ` : ''}
+                                        ${d.processed_video_url ? `
+                                            <div class="rounded-xl overflow-hidden border border-teal-200 shadow-sm bg-black">
+                                                <p class="text-[10px] font-semibold text-teal-400 uppercase tracking-wider px-3 pt-2 pb-1 bg-gray-900">Processed Video (Deteksi YOLO AI)</p>
+                                                <video controls class="w-full" style="max-height:260px;" preload="metadata">
+                                                    <source src="${d.processed_video_url}" type="video/mp4">
+                                                    Browser Anda tidak mendukung pemutaran video.
+                                                </video>
+                                            </div>
+                                        ` : ''}
+                                    </div>
+                                ` : ''}
+
+                                ${imagesHtml ? `
+                                    <div class="mt-4">
+                                        <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Foto Pemeriksaan Earscope</p>
+                                        <div class="grid grid-cols-2 gap-3">${imagesHtml}</div>
+                                    </div>
+                                ` : ''}
                             </div>
-                            ${data.diagnosis.notes ? `
-                            <div class="mt-4">
-                                <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Notes</p>
-                                <p class="mt-1 text-sm text-gray-900">${data.diagnosis.notes}</p>
+                        `;
+                    } else {
+                        diagnosisSection = `
+                            <div class="border-b pb-4">
+                                <p class="text-sm text-gray-500">Tidak ada hasil diagnosis tersedia.</p>
                             </div>
-                            ` : ''}
-                        </div>
-                    ` : `
-                        <div class="border-b pb-4">
-                            <p class="text-sm text-gray-500">Tidak ada hasil diagnosis tersedia.</p>
-                        </div>
-                    `;
+                        `;
+                    }
 
                     let content = `
                         <div class="space-y-4">

@@ -193,20 +193,6 @@
                     let aiSection = '';
                     if (data.diagnosis) {
                         const d = data.diagnosis;
-                        let imagesHtml = '';
-                        if (d.images && d.images.length > 0) {
-                            imagesHtml = d.images.map(img => `
-                                <div class="bg-white rounded-xl border border-slate-100 overflow-hidden">
-                                    <img src="${img.image_url}" alt="Otoscope" class="w-full h-36 object-cover" />
-                                    ${img.ai_screening_result ? `
-                                        <div class="p-2.5">
-                                            <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">AI Result</p>
-                                            <p class="text-xs font-bold text-slate-700 mt-0.5">${typeof img.ai_screening_result === 'object' ? JSON.stringify(img.ai_screening_result) : img.ai_screening_result}</p>
-                                        </div>
-                                    ` : ''}
-                                </div>
-                            `).join('');
-                        }
 
                         aiSection = `
                             <div class="pt-5 border-t border-slate-100">
@@ -227,33 +213,6 @@
                                         ${d.is_verified ? 'Verified' : 'Not Verified'}
                                     </span>
                                 </div>
-
-                                ${(d.raw_video_url || d.processed_video_url) ? `
-                                    <div class="mt-4 space-y-4">
-                                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Video Pemeriksaan Earscope</p>
-                                        ${d.raw_video_url ? `
-                                            <div class="rounded-xl overflow-hidden border border-slate-200 bg-black">
-                                                <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-3 pt-2 pb-1 bg-slate-900">Raw Video (Tanpa Deteksi)</p>
-                                                <video controls class="w-full" style="max-height:260px;" preload="metadata">
-                                                    <source src="${d.raw_video_url}" type="video/mp4">
-                                                    Browser Anda tidak mendukung pemutaran video.
-                                                </video>
-                                            </div>
-                                        ` : ''}
-                                        ${d.processed_video_url ? `
-                                            <div class="rounded-xl overflow-hidden border border-teal-200 bg-black">
-                                                <p class="text-[10px] font-semibold text-teal-400 uppercase tracking-wider px-3 pt-2 pb-1 bg-slate-900">Processed Video (Deteksi YOLO AI)</p>
-                                                <video controls class="w-full" style="max-height:260px;" preload="metadata">
-                                                    <source src="${d.processed_video_url}" type="video/mp4">
-                                                    Browser Anda tidak mendukung pemutaran video.
-                                                </video>
-                                            </div>
-                                        ` : ''}
-                                    </div>
-                                ` : ''}
-                                ${imagesHtml ? `
-                                    <div class="grid grid-cols-2 gap-3 mt-3">${imagesHtml}</div>
-                                ` : ''}
                             </div>
                         `;
                     }

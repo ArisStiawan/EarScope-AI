@@ -129,7 +129,7 @@ class PatientController extends Controller
         $consultations = $patient->consultations()
             ->with(['doctor', 'diagnosis'])
             ->where('status', 'done')
-            ->orderBy('scheduled_date', 'asc')
+            ->orderBy('scheduled_date', 'desc')
             ->paginate($perPage);
 
         return view('patient.consultation-result', compact('consultations', 'perPage'));
