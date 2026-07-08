@@ -77,14 +77,8 @@
             style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 4px 8px; border-radius: 6px; outline: none; width: 120px; text-align: right;" />
         </div>
         <div class="info-row" style="align-items: flex-end;">
-          <label for="selectCameraIndex" class="info-label">Camera Source</label>
-          <select id="selectCameraIndex" class="info-value"
-            style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 4px 8px; border-radius: 6px; outline: none; width: 120px; text-align: right; cursor: pointer;">
-            <option value="auto"  style="color: black;" selected>Auto-Detect</option>
-            <option value="0"     style="color: black;">Camera 0</option>
-            <option value="1"     style="color: black;">Camera 1</option>
-            <option value="2"     style="color: black;">Camera 2</option>
-          </select>
+          <label class="info-label">Camera Source</label>
+          <span class="info-value" style="color: #cbd5e1; font-weight: 500;">Manual (Code)</span>
         </div>
       </div>
 
@@ -131,17 +125,7 @@
         return inputConsultationId.value.trim();
       }
 
-      // Camera Source — simpan ke localStorage
-      const selectCameraIndex = document.getElementById('selectCameraIndex');
-      const savedCameraIndex  = localStorage.getItem('selectedCameraIndex');
-      if (savedCameraIndex !== null) {
-        selectCameraIndex.value = savedCameraIndex;
-      }
-      selectCameraIndex.addEventListener('change', () => {
-        localStorage.setItem('selectedCameraIndex', selectCameraIndex.value);
-        // Restart preview with new camera
-        startPreview();
-      });
+      // Camera index is configured manually in the backend code (app.py)
 
       let isRecording  = false;
       let timerInterval;
@@ -152,12 +136,11 @@
       // PREVIEW — Auto-start on page load
       // ============================================================
       function startPreview() {
-        const camIdx = selectCameraIndex.value;
         loadingOverlay.classList.add("visible");
         previewBadge.classList.remove("visible");
 
         // Set stream URL — camera worker starts on Flask side
-        const src = "/preview?camera_index=" + encodeURIComponent(camIdx);
+        const src = "/preview";
         video.src = src;
 
         video.onload = () => {

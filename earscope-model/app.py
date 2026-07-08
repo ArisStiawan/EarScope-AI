@@ -29,6 +29,9 @@ network_available = True
 stop_event = Event()
 send_queue = queue.Queue()
 
+# Camera settings
+CAMERA_INDEX = 1  # Ganti ID kamera secara manual di sini (0, 1, 2, dll.)
+
 # Shared camera state
 latest_frame       = None
 latest_frame_lock  = threading.Lock()
@@ -36,7 +39,6 @@ camera_cap         = None
 camera_lock        = threading.Lock()
 camera_thread_running = False
 camera_thread_lock = threading.Lock()
-current_camera_index = None
 
 # Recording state
 is_recording          = False
@@ -61,8 +63,19 @@ if not app.secret_key:
 # Load labels and colors from YAML file
 with open('model-earscope/data.yml', 'r') as f:
     data = yaml.safe_load(f)
-    labels = data['labels']
-    colors = data['colors']
+    
+    if 'names' in data and 'labels' not in data:
+        # Support for standard YOLO format (like Roboflow exports)
+        names = data['names']
+        labels = {i: name for i, name in enumerate(names)} if isinstance(names, list) else names
+        
+        # Auto-generate colors (BGR format) since standard YOLO YAML doesn't have it
+        default_colors = [[255, 0, 0], [0, 255, 0], [0, 0, 255], [255, 255, 0], [255, 0, 255], [0, 255, 255]]
+        colors = {i: default_colors[i % len(default_colors)] for i in range(len(labels))}
+    else:
+        # Legacy custom format
+        labels = data.get('labels', {})
+        colors = data.get('colors', {})
 
 
 # ============================================================
@@ -146,7 +159,7 @@ detection = Detection()
 # CAMERA WORKER THREAD (Single shared instance)
 # ============================================================
 
-def camera_worker(camera_index=None):
+def camera_worker():
     """
     Background thread that opens the camera once and continuously
     reads frames into latest_frame. Also writes frames to recorded_frames
@@ -157,47 +170,23 @@ def camera_worker(camera_index=None):
     backend = cv2.CAP_DSHOW if os.name == 'nt' else cv2.CAP_ANY
     cap = None
 
-    # Try manual index first
-    if camera_index is not None and camera_index != 'auto':
-        try:
-            cam_idx = int(camera_index)
-            logger.info(f"Mencoba kamera manual index {cam_idx}...")
-            test_cap = cv2.VideoCapture(cam_idx, backend)
-            if test_cap.isOpened():
-                ret, _ = test_cap.read()
-                if ret:
-                    cap = test_cap
-                    logger.info(f"Kamera manual ditemukan di index {cam_idx}")
-                else:
-                    test_cap.release()
+    try:
+        logger.info(f"Mencoba membuka kamera index manual {CAMERA_INDEX}...")
+        test_cap = cv2.VideoCapture(CAMERA_INDEX, backend)
+        if test_cap.isOpened():
+            ret, _ = test_cap.read()
+            if ret:
+                cap = test_cap
+                logger.info(f"Kamera manual ditemukan di index {CAMERA_INDEX}")
             else:
                 test_cap.release()
-        except Exception as e:
-            logger.error(f"Error membuka kamera manual: {e}")
-
-    # Auto-detect fallback
-    if cap is None:
-        skip_idx = None
-        if camera_index is not None and camera_index != 'auto':
-            try:
-                skip_idx = int(camera_index)
-            except ValueError:
-                pass
-        for cam_idx in [0, 1, 2]:
-            if cam_idx == skip_idx:
-                continue
-            logger.info(f"Mencoba kamera index {cam_idx}...")
-            test_cap = cv2.VideoCapture(cam_idx, backend)
-            if test_cap.isOpened():
-                ret, _ = test_cap.read()
-                if ret:
-                    cap = test_cap
-                    logger.info(f"Kamera ditemukan di index {cam_idx}")
-                    break
+        else:
             test_cap.release()
+    except Exception as e:
+        logger.error(f"Error membuka kamera manual: {e}")
 
     if cap is None:
-        logger.error("Tidak ada kamera yang terdeteksi!")
+        logger.error(f"Tidak dapat membuka kamera index {CAMERA_INDEX}!")
         with camera_thread_lock:
             camera_thread_running = False
         return
@@ -243,32 +232,16 @@ def camera_worker(camera_index=None):
     logger.info("Camera worker berhenti.")
 
 
-def ensure_camera_started(camera_index=None):
-    """Start camera worker thread if not already running, or restart if index changed."""
-    global camera_thread_running, current_camera_index
+def ensure_camera_started():
+    """Start camera worker thread if not already running."""
+    global camera_thread_running
     
-    need_restart = False
-    with camera_thread_lock:
-        if camera_thread_running:
-            if camera_index is not None and str(camera_index) != str(current_camera_index):
-                need_restart = True
-                camera_thread_running = False
-
-    if need_restart:
-        logger.info(f"Menghentikan kamera saat ini ({current_camera_index}) untuk ganti ke {camera_index}...")
-        while True:
-            with camera_thread_lock:
-                if not camera_thread_running:
-                    break
-            time.sleep(0.1)
-
     with camera_thread_lock:
         if not camera_thread_running:
-            current_camera_index = camera_index
             camera_thread_running = True
-            t = threading.Thread(target=camera_worker, args=(camera_index,), daemon=True)
+            t = threading.Thread(target=camera_worker, daemon=True)
             t.start()
-            logger.info(f"Camera worker thread dimulai dengan index {camera_index}.")
+            logger.info(f"Camera worker thread dimulai dengan index manual {CAMERA_INDEX}.")
 
 
 def generate_preview():
@@ -398,8 +371,7 @@ def preview():
     Stream live camera preview (no recording).
     Automatically starts the shared camera worker if not running.
     """
-    camera_index = request.args.get('camera_index', None)
-    ensure_camera_started(camera_index)
+    ensure_camera_started()
     return Response(generate_preview(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 

@@ -1,11 +1,15 @@
-labels:
-  0: acute otitis media
-  1: chronic otitis media
-  2: earwaxplug
-  3: myringosclerosis
+path: c:/Users/Aris/OneDrive/Desktop/TUGAS KULIAH/Folder draf ta/Dataset New.v2i.yolov8
+train: train/images
+val: valid/images
+test: test/images
 
-colors:
-  0: [255, 0, 0]
-  1: [0, 255, 0]
-  2: [0, 0, 255]
-  3: [255, 255, 0]
+nc: 6
+names:
+  ["acute", "chronic", "earwaxplug", "myringosclerosis", "normal", "undefined"]
+
+roboflow:
+  workspace: aris-98scy
+  project: dataset-new-y91ch-hqkzv
+  version: 2
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/aris-98scy/dataset-new-y91ch-hqkzv/dataset/2

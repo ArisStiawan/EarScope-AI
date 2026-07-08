@@ -1,0 +1,11 @@
+labels:
+  0: acute otitis media
+  1: chronic otitis media
+  2: earwaxplug
+  3: myringosclerosis
+
+colors:
+  0: [255, 0, 0]
+  1: [0, 255, 0]
+  2: [0, 0, 255]
+  3: [255, 255, 0]
