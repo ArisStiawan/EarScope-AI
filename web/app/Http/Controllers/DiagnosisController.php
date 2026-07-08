@@ -80,12 +80,11 @@ class DiagnosisController extends Controller
             );
         }
 
-        // Tandai konsultasi sebagai 'done' dan simpan notes ke consultation_requests
+        // Tandai konsultasi sebagai 'done'
         $consultation = ConsultationRequest::find($request->consultation_request_id);
         if ($consultation) {
             $consultation->update([
-                'status' => 'done',
-                'notes'  => $request->notes
+                'status' => 'done'
             ]);
         }
 

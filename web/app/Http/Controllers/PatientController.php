@@ -152,10 +152,10 @@ class PatientController extends Controller
                 'result' => $d->diagnosis_result,
                 'notes' => $d->notes,
                 'is_verified' => $d->is_verified,
-                'raw_video_url' => $d->raw_video_path
-                    ? asset('storage/' . $d->raw_video_path) : null,
-                'processed_video_url' => $d->processed_video_path
-                    ? asset('storage/' . $d->processed_video_path) : null,
+                'raw_video_url' => $d->raw_video_url
+                    ?? ($d->raw_video_path ? asset('storage/' . $d->raw_video_path) : null),
+                'processed_video_url' => $d->processed_video_url
+                    ?? ($d->processed_video_path ? asset('storage/' . $d->processed_video_path) : null),
                 'images' => $d->images->map(fn($img) => [
                     'id' => $img->id,
                     'image_url' => asset('storage/' . $img->image_path),

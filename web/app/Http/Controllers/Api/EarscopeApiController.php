@@ -49,7 +49,8 @@ class EarscopeApiController extends Controller
                 'eager_async'  => false, // Tunggu transcoding selesai
             ]);
 
-            $url = $result['secure_url'] ?? null;
+            // Ambil URL hasil transcoding H.264 dari eager array
+            $url = $result['eager'][0]['secure_url'] ?? ($result['secure_url'] ?? null);
             Log::info('[Cloudinary] Upload sukses', ['url' => $url, 'folder' => $folder]);
             return $url;
 

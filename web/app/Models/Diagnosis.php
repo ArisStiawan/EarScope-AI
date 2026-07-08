@@ -36,4 +36,24 @@ class Diagnosis extends Model
     {
         return $this->hasMany(DiagnosisImage::class);
     }
+
+    /**
+     * Memastikan URL Cloudinary yang diretrieve selalu mengandung parameter H.264
+     * sehingga semua video (baik yang lama maupun yang baru) bisa diputar.
+     */
+    public function getRawVideoUrlAttribute($value)
+    {
+        if ($value && str_contains($value, 'res.cloudinary.com') && !str_contains($value, 'vc_h264')) {
+            return str_replace('/upload/v', '/upload/vc_h264/v', $value);
+        }
+        return $value;
+    }
+
+    public function getProcessedVideoUrlAttribute($value)
+    {
+        if ($value && str_contains($value, 'res.cloudinary.com') && !str_contains($value, 'vc_h264')) {
+            return str_replace('/upload/v', '/upload/vc_h264/v', $value);
+        }
+        return $value;
+    }
 }
