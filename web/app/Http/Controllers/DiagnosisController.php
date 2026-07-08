@@ -80,10 +80,13 @@ class DiagnosisController extends Controller
             );
         }
 
-        // Tandai konsultasi sebagai 'done'
-        $consultation = $diagnosis->consultation;
-        if ($consultation && $consultation->status === 'scheduled') {
-            $consultation->update(['status' => 'done']);
+        // Tandai konsultasi sebagai 'done' dan simpan notes ke consultation_requests
+        $consultation = ConsultationRequest::find($request->consultation_request_id);
+        if ($consultation) {
+            $consultation->update([
+                'status' => 'done',
+                'notes'  => $request->notes
+            ]);
         }
 
         $doctor = Auth::user()->doctor;
