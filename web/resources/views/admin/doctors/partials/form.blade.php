@@ -78,7 +78,7 @@
     <div>
         <label for="patient_quota" class="block text-sm font-medium text-gray-700">Kuota Pasien / Hari</label>
         <input type="number" id="patient_quota" name="patient_quota" min="0"
-            value="{{ old('patient_quota', $doctor->patient_quota ?? '') }}"
+            value="{{ old('patient_quota', ($edit ?? false) ? '' : ($doctor->patient_quota ?? '')) }}"
             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 border focus:border-blue-500 focus:ring-blue-500"
             placeholder="Kosongkan untuk hitung otomatis dari jam praktik" />
         <p class="mt-1 text-xs text-gray-500">
