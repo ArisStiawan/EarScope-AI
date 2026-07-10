@@ -16,6 +16,14 @@ class Doctor extends Model
         'patient_quota'
     ];
 
+    /**
+     * Flag sementara (bukan kolom DB) untuk menandai bahwa admin
+     * mengisi kuota secara manual, sehingga boot() tidak override.
+     * Dideklarasikan sebagai public property agar tidak masuk ke
+     * Eloquent $attributes dan tidak ikut di-INSERT/UPDATE ke database.
+     */
+    public bool $manual_quota = false;
+
     protected static function boot()
     {
         parent::boot();
