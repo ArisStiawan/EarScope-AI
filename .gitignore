@@ -15,3 +15,5 @@ earscope-model/env/
 .DS_Store
 Thumbs.db
 *.md
+
+/notes
