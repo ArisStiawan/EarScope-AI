@@ -3,8 +3,8 @@
 @section('admin-content')
 <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-fade-in-up">
     <div>
-        <h1 class="text-2xl font-bold text-slate-800">Doctor Data Management</h1>
-        <p class="text-xs text-slate-400 font-medium mt-1">Manage doctor data, usernames, license numbers, and specializations</p>
+        <h1 class="text-2xl font-bold text-slate-800">Manajemen Data Dokter</h1>
+        <p class="text-xs text-slate-400 font-medium mt-1">Kelola data dokter, nama pengguna, nomor lisensi, dan spesialisasi</p>
     </div>
     
     <a href="{{ route('admin.doctors.create') }}" 
@@ -12,7 +12,7 @@
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
         </svg>
-        Add New Doctor
+        Tambah Dokter Baru
     </a>
 </div>
 
@@ -94,14 +94,14 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                 </div>
-                <h3 class="text-base font-bold text-slate-700">No Doctor Data Yet</h3>
-                <p class="text-xs text-slate-400 mt-1">The system has not registered any specialist doctor accounts.</p>
+                <h3 class="text-base font-bold text-slate-700">Belum Ada Data Dokter</h3>
+                <p class="text-xs text-slate-400 mt-1">Sistem belum mendaftarkan akun dokter spesialis apa pun.</p>
                 <div class="mt-6">
                     <a href="{{ route('admin.doctors.create') }}" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-xs font-semibold rounded-xl text-white bg-teal-600 hover:bg-teal-700 transition">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                         </svg>
-                        Add New Doctor
+                        Tambah Dokter Baru
                     </a>
                 </div>
             </div>

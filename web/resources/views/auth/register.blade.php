@@ -41,7 +41,7 @@
                 </div>
                 <h1 class="text-2xl font-extrabold text-white tracking-tight mb-1 relative z-10">
                     {{ config('app.name', 'EarScope') }}</h1>
-                <p class="text-teal-100 text-xs font-medium relative z-10">Register for integrated ear health consultation access</p>
+                <p class="text-teal-100 text-xs font-medium relative z-10">Daftar untuk akses konsultasi kesehatan telinga terintegrasi</p>
             </div>
 
             <div class="px-6 py-5">
@@ -135,7 +135,7 @@
 
                             <div>
                                 <label for="password_confirmation"
-                                    class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Confirm
+                                    class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Konfirmasi
                                     Password</label>
                                 <input id="password_confirmation" name="password_confirmation" type="password" required
                                     class="w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50 text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 transition-all duration-200 text-sm font-medium" />
@@ -146,7 +146,7 @@
                     <div class="grid grid-cols-1 gap-2 sm:flex-row sm:items-center sm:justify-between">
                         <button type="submit"
                             class="w-full sm:w-auto px-5 py-3 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-semibold rounded-xl transition-all duration-300 shadow-md shadow-teal-500/10 hover:shadow-teal-500/30">
-                            Register
+                            Daftar
                         </button>
                         <div class="flex items-center justify-center gap-1">
                             <span class="text-xs text-slate-400">Sudah punya akun?</span>

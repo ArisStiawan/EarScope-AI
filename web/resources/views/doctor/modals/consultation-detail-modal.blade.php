@@ -15,8 +15,8 @@
                         </svg>
                     </div>
                     <div>
-                        <h3 class="text-base font-bold text-slate-800">Consultation Record Detail</h3>
-                        <p class="text-[10px] text-slate-400 font-medium">Patient data & AI otoscope examination results</p>
+                        <h3 class="text-base font-bold text-slate-800">Detail Riwayat Konsultasi</h3>
+                        <p class="text-[10px] text-slate-400 font-medium">Data pasien & hasil pemeriksaan AI otoskop</p>
                     </div>
                 </div>
                 <button type="button" onclick="closeDetailModal()" class="text-slate-400 hover:text-slate-600 transition">
@@ -33,14 +33,14 @@
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                     </svg>
-                    <p class="text-xs font-medium">Loading data...</p>
+                    <p class="text-xs font-medium">Memuat data...</p>
                 </div>
             </div>
 
             {{-- Footer --}}
             <div id="modalFooter" class="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex justify-end">
                 <button type="button" onclick="closeDetailModal()" class="px-4 py-2 text-xs font-semibold uppercase tracking-wider rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 transition">
-                    Close
+                    Tutup
                 </button>
             </div>
         </div>

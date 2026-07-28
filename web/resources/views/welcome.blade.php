@@ -41,7 +41,7 @@
                         </div>
                     </div>
                     <h1 class="text-2xl font-extrabold text-white tracking-tight mb-1 relative z-10">{{ config('app.name', 'EarScope') }}</h1>
-                    <p class="text-teal-100 text-xs font-medium relative z-10">Integrated Ear Health Consultation Platform</p>
+                    <p class="text-teal-100 text-xs font-medium relative z-10">Platform Konsultasi Kesehatan Telinga Terpadu</p>
                 </div>
 
                 <!-- Form Content -->
@@ -166,10 +166,10 @@
                             @if (Route::has('register'))
                                 <div>
                                     <p class="text-xs text-slate-400 font-medium mb-3">
-                                        Don't have a consultation account yet?
+                                        Belum punya akun konsultasi?
                                     </p>
                                     <a href="{{ route('register') }}" class="inline-flex items-center justify-center px-6 py-2.5 border border-teal-200 text-teal-600 hover:bg-teal-50/50 hover:border-teal-300 rounded-xl text-xs font-semibold transition-all duration-200">
-                                        Create New Account
+                                        Buat Akun Baru
                                         <svg class="w-3.5 h-3.5 ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                                         </svg>

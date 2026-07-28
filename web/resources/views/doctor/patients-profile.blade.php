@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            Patients Profile
+            Profil Pasien
         </h2>
     </x-slot>
 
@@ -11,7 +11,7 @@
             <div class="bg-white shadow-sm sm:rounded-lg p-6">
 
                 @if($patients->isEmpty())
-                    <p class="text-gray-500">No patients found</p>
+                    <p class="text-gray-500">Tidak ada pasien ditemukan</p>
                 @else
 
                     <div class="overflow-x-auto">
@@ -19,11 +19,11 @@
 
                             <thead class="bg-gray-50">
                                 <tr class="text-left text-xs font-semibold text-gray-500 uppercase">
-                                    <th class="px-4 py-2">Name</th>
-                                    <th class="px-4 py-2">Gender</th>
-                                    <th class="px-4 py-2">Address</th>
+                                    <th class="px-4 py-2">Nama</th>
+                                    <th class="px-4 py-2">Jenis Kelamin</th>
+                                    <th class="px-4 py-2">Alamat</th>
                                     <th class="px-4 py-2">Email</th>
-                                    <th class="px-4 py-2">Action</th>
+                                    <th class="px-4 py-2">Aksi</th>
                                 </tr>
                             </thead>
 
@@ -43,7 +43,7 @@
                                         </td>
 
                                         <td class="px-4 py-3 text-sm text-gray-700 capitalize">
-                                            {{ $patient->gender ?? '-' }}
+                                            {{ $patient->gender === 'male' ? 'Laki-laki' : ($patient->gender === 'female' ? 'Perempuan' : ($patient->gender ?? '-')) }}
                                         </td>
 
                                         <td class="px-4 py-3 text-sm text-gray-700 max-w-xs truncate">

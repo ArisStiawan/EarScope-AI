@@ -183,7 +183,7 @@ class AdminController extends Controller
 
         $doctor->save();
 
-        return redirect()->route('admin.doctors.index')->with('success', 'Doctor berhasil ditambahkan');
+        return redirect()->route('admin.doctors.index')->with('success', 'Dokter berhasil ditambahkan.');
     }
 
     public function editDoctor($doctor)

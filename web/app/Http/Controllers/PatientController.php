@@ -114,7 +114,7 @@ class PatientController extends Controller
         ActivityLogger::logConsultationRequested($consultation, $patient);
 
         return redirect()->route('patient.dashboard')
-            ->with('success', 'Consultation request submitted successfully! Waiting for doctor confirmation.');
+            ->with('success', 'Permintaan konsultasi berhasil dikirim! Menunggu konfirmasi dokter.');
     }
 
     public function consultationResults(Request $request)

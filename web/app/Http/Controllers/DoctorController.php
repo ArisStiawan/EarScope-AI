@@ -380,7 +380,7 @@ class DoctorController extends Controller
             $doctor->user_id
         );
 
-        return redirect()->route('doctor.consultations')->with('success', 'Consultation successfully verified and completed.');
+        return redirect()->route('doctor.consultations')->with('success', 'Konsultasi berhasil diverifikasi dan diselesaikan.');
     }
 
     /**

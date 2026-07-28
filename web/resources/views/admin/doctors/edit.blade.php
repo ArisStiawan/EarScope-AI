@@ -2,8 +2,8 @@
 
 @section('admin-content')
 <div class="mb-6">
-    <h1 class="text-3xl font-bold text-gray-900">Edit Doctor</h1>
-    <p class="text-gray-600 mt-2">Update doctor information below</p>
+    <h1 class="text-3xl font-bold text-gray-900">Edit Dokter</h1>
+    <p class="text-gray-600 mt-2">Perbarui informasi dokter di bawah ini</p>
 </div>
 
 <div class="bg-white rounded-lg shadow-md p-6">
@@ -12,7 +12,7 @@
         'method' => 'PATCH',
         'edit' => true,
         'doctor' => $doctor,
-        'submit_label' => 'Update Doctor'
+        'submit_label' => 'Perbarui Dokter'
     ])
 </div>
 @endsection

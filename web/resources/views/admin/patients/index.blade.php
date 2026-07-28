@@ -3,11 +3,11 @@
 @section('admin-content')
 <div class="mb-6 flex justify-between items-center">
     <div>
-        <h1 class="text-3xl font-bold text-gray-900">Patient Data</h1>
-        <p class="text-gray-600 mt-2">List of all patients registered in the system</p>
+        <h1 class="text-3xl font-bold text-gray-900">Data Pasien</h1>
+        <p class="text-gray-600 mt-2">Daftar semua pasien yang terdaftar di sistem</p>
     </div>
     <span class="px-4 py-2 bg-green-100 text-green-800 rounded-full text-sm font-semibold">
-        Total: {{ $patients->total() }} Patients
+        Total: {{ $patients->total() }} Pasien
     </span>
 </div>
 
@@ -19,7 +19,7 @@
                 <thead class="bg-gray-50 border-b border-gray-200">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">No</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Username</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Nama Pengguna</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">Tanggal Registrasi</th>
                     </tr>
                 </thead>
@@ -53,8 +53,8 @@
                 <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path>
                 </svg>
-                <h3 class="mt-2 text-sm font-medium text-gray-900">No patients yet</h3>
-                <p class="mt-1 text-sm text-gray-500">No patients have registered yet</p>
+                <h3 class="mt-2 text-sm font-medium text-gray-900">Belum ada pasien</h3>
+                <p class="mt-1 text-sm text-gray-500">Belum ada pasien yang mendaftar</p>
             </div>
         @endif
     </div>

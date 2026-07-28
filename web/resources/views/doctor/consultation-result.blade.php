@@ -89,14 +89,14 @@
 
                     <div id="doctorResultModalContent" class="mt-4">
                         <div class="text-center">
-                            <p class="text-gray-500">Loading...</p>
+                            <p class="text-gray-500">Memuat...</p>
                         </div>
                     </div>
                 </div>
 
                 <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-2">
                     <button type="button" onclick="closeDoctorResultModal()" class="w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm">
-                        Close
+                        Tutup
                     </button>
                 </div>
             </div>
@@ -121,7 +121,7 @@
                                     <img src="${img.image_url}" alt="Otoscope" class="w-full h-36 object-cover" />
                                     ${img.ai_screening_result ? `
                                         <div class="p-2.5">
-                                            <p class="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">AI Result</p>
+                                            <p class="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">Hasil AI</p>
                                             <p class="text-xs font-bold text-gray-700 mt-0.5">${typeof img.ai_screening_result === 'object' ? JSON.stringify(img.ai_screening_result) : img.ai_screening_result}</p>
                                         </div>
                                     ` : ''}
@@ -133,12 +133,12 @@
                             <div class="border-b pb-4">
                                 <h4 class="font-semibold text-gray-900 mb-3">Diagnosis</h4>
                                 <div>
-                                    <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Result</p>
+                                    <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Hasil</p>
                                     <p class="mt-1 text-sm text-gray-900">${d.diagnosis_result ?? '-'}</p>
                                 </div>
                                 ${d.notes ? `
                                 <div class="mt-4">
-                                    <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Notes</p>
+                                    <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Catatan</p>
                                     <p class="mt-1 text-sm text-gray-900">${d.notes}</p>
                                 </div>
                                 ` : ''}
@@ -205,8 +205,7 @@
                                         <p class="mt-1 text-sm text-gray-900">${data.patient?.age ?? '-'} tahun</p>
                                     </div>
                                     <div>
-                                        <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Jenis Kelamin</p>
-                                        <p class="mt-1 text-sm text-gray-900">${data.patient?.gender ?? '-'}</p>
+                                        <p class="mt-1 text-sm text-gray-900">${data.patient?.gender === 'male' ? 'Laki-laki' : (data.patient?.gender === 'female' ? 'Perempuan' : (data.patient?.gender ?? '-'))}</p>
                                     </div>
                                 </div>
                             </div>
@@ -227,7 +226,13 @@
                                     <div>
                                         <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Status</p>
                                         <p class="mt-1"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusBadge}">${
-                                            data.status.charAt(0).toUpperCase() + data.status.slice(1)
+                                            (function(s){
+                                                if(s==='pending') return 'Menunggu';
+                                                if(s==='scheduled') return 'Dijadwalkan';
+                                                if(s==='cancelled') return 'Dibatalkan';
+                                                if(s==='done') return 'Selesai';
+                                                return s.charAt(0).toUpperCase() + s.slice(1);
+                                            })(data.status)
                                         }</span></p>
                                     </div>
                                     <div>

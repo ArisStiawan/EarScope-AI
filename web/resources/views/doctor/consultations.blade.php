@@ -10,7 +10,7 @@
                 <h2 class="font-bold text-2xl text-slate-800 leading-tight">
                     {{ __('Consultation Request List') }}
                 </h2>
-                <p class="text-xs font-medium text-slate-400 mt-0.5">Manage appointments and ear complaint diagnoses</p>
+                <p class="text-xs font-medium text-slate-400 mt-0.5">Kelola janji temu dan diagnosis keluhan telinga</p>
             </div>
         </div>
     </x-slot>
@@ -23,23 +23,23 @@
                     <div class="mb-6 flex flex-wrap gap-2 border-b border-gray-200 pb-4">
                         <a href="{{ route('doctor.consultations', ['status' => 'all']) }}" 
                            class="px-4 py-2 rounded-md text-sm font-medium {{ $status === 'all' ? 'bg-indigo-100 text-indigo-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
-                            All
+                            Semua
                         </a>
                         <a href="{{ route('doctor.consultations', ['status' => 'pending']) }}" 
                            class="px-4 py-2 rounded-md text-sm font-medium {{ $status === 'pending' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
-                            Pending
+                            Menunggu
                         </a>
                         <a href="{{ route('doctor.consultations', ['status' => 'scheduled']) }}" 
                            class="px-4 py-2 rounded-md text-sm font-medium {{ $status === 'scheduled' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
-                            Scheduled
+                            Dijadwalkan
                         </a>
                         <a href="{{ route('doctor.consultations', ['status' => 'cancelled']) }}" 
                            class="px-4 py-2 rounded-md text-sm font-medium {{ $status === 'cancelled' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
-                            Cancelled
+                            Dibatalkan
                         </a>
                         <a href="{{ route('doctor.consultations', ['status' => 'done']) }}" 
                            class="px-4 py-2 rounded-md text-sm font-medium {{ $status === 'done' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
-                            Done
+                            Selesai
                         </a>
                     </div>
                     
@@ -50,20 +50,20 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                 </svg>
                             </div>
-                            <h4 class="text-base font-bold text-slate-700">No Requests</h4>
-                            <p class="text-xs text-slate-400 mt-1">No patients have submitted consultation requests for this status.</p>
+                            <h4 class="text-base font-bold text-slate-700">Tidak Ada Permintaan</h4>
+                            <p class="text-xs text-slate-400 mt-1">Belum ada pasien yang mengajukan permintaan konsultasi untuk status ini.</p>
                         </div>
                     @else
                         <div class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
                                     <tr>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient Name</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Pasien</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Complaint</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Keluhan</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Scheduled</th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jadwal</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-100 text-sm">
@@ -98,7 +98,10 @@
                                                     {{ $consultation->status === 'scheduled' ? 'bg-green-100 text-green-800' : 
                                                        ($consultation->status === 'cancelled' ? 'bg-red-100 text-red-800' : 
                                                        ($consultation->status === 'done' ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800')) }}">
-                                                    {{ ucfirst($consultation->status) }}
+                                                    @php
+                                                        $statusLabels = ['pending'=>'Menunggu','scheduled'=>'Dijadwalkan','cancelled'=>'Dibatalkan','done'=>'Selesai'];
+                                                    @endphp
+                                                    {{ $statusLabels[$consultation->status] ?? ucfirst($consultation->status) }}
                                                 </span>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
@@ -108,7 +111,7 @@
                                                         <span class="text-[11px] text-indigo-600 font-bold">Antrean: {{ $consultation->queue_number }}</span>
                                                     </div>
                                                 @else
-                                                    <span class="text-xs text-slate-400 font-medium italic">Not yet scheduled</span>
+                                                    <span class="text-xs text-slate-400 font-medium italic">Belum dijadwalkan</span>
                                                 @endif
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-xs font-semibold uppercase tracking-wider space-x-2.5">
@@ -120,13 +123,13 @@
                                                     <button type="button"
                                                         onclick="openScheduleModal('{{ $consultation->id }}', true)"
                                                         class="text-green-600 hover:text-green-900 underline">
-                                                        Set Schedule
+                                                        Atur Jadwal
                                                     </button>
                                                 @endif
 
                                                 @if($consultation->status === 'scheduled' && !$consultation->diagnosis)
                                                     <button type="button" onclick="openScheduleModal('{{ $consultation->id }}', false)" class="text-blue-600 hover:text-blue-900 underline">
-                                                        Reschedule
+                                                        Jadwalkan Ulang
                                                     </button>
                                                 @endif
                                             </td>
@@ -176,14 +179,14 @@
                 dataType: 'json',
                 success: function(data) {
                     // Define helper variables
-                    const genderMap = { 'male': 'Male', 'female': 'Female' };
+                    const genderMap = { 'male': 'Laki-laki', 'female': 'Perempuan' };
                     const gender = genderMap[data.patient?.gender] || data.patient?.gender || '-';
 
                     const statusConfig = {
-                        'pending':   { label: 'Pending',    class: 'bg-amber-50 text-amber-700 border-amber-200/50' },
-                        'scheduled': { label: 'Scheduled', class: 'bg-emerald-50 text-emerald-700 border-emerald-200/50' },
-                        'cancelled': { label: 'Cancelled',  class: 'bg-rose-50 text-rose-700 border-rose-200/50' },
-                        'done':      { label: 'Done',     class: 'bg-sky-50 text-sky-700 border-sky-200/50' },
+                        'pending':   { label: 'Menunggu',    class: 'bg-amber-50 text-amber-700 border-amber-200/50' },
+                        'scheduled': { label: 'Dijadwalkan', class: 'bg-emerald-50 text-emerald-700 border-emerald-200/50' },
+                        'cancelled': { label: 'Dibatalkan',  class: 'bg-rose-50 text-rose-700 border-rose-200/50' },
+                        'done':      { label: 'Selesai',     class: 'bg-sky-50 text-sky-700 border-sky-200/50' },
                     };
                     const sc = statusConfig[data.status] || { label: data.status, class: 'bg-slate-50 text-slate-700 border-slate-200/50' };
                     const statusLabel = sc.label;
@@ -196,21 +199,21 @@
 
                         aiSection = `
                             <div class="pt-5 border-t border-slate-100">
-                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3">AI Otoscope Examination Results</p>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3">Hasil Pemeriksaan AI Otoskop</p>
                                 <div class="bg-slate-50 rounded-xl p-3 mb-3">
                                     <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Diagnosis</p>
                                     <p class="text-sm font-bold text-slate-800 mt-0.5">${d.diagnosis_result || '-'}</p>
                                 </div>
                                 ${data.notes ? `
                                     <div class="bg-slate-50 rounded-xl p-3 mb-3">
-                                        <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Doctor Notes</p>
+                                        <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Catatan Dokter</p>
                                         <p class="text-sm text-slate-700 mt-0.5">${data.notes}</p>
                                     </div>
                                 ` : ''}
                                 <div class="bg-slate-50 rounded-xl p-3 mb-3">
-                                    <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Verification Status</p>
+                                    <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Status Verifikasi</p>
                                     <span class="mt-1 inline-flex px-2 py-0.5 text-xs font-bold rounded-full border ${d.is_verified ? 'bg-emerald-50 text-emerald-700 border-emerald-200/50' : 'bg-amber-50 text-amber-700 border-amber-200/50'}">
-                                        ${d.is_verified ? 'Verified' : 'Not Verified'}
+                                        ${d.is_verified ? 'Terverifikasi' : 'Belum Terverifikasi'}
                                     </span>
                                 </div>
                             </div>
@@ -221,15 +224,15 @@
                     let content = `
                         <div class="space-y-0">
                             <div>
-                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3">Patient Data</p>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3">Data Pasien</p>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <div class="bg-slate-50 rounded-xl p-3">
-                                        <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Name</p>
+                                        <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Nama</p>
                                         <p class="text-sm font-bold text-slate-800 mt-0.5">${data.patient?.name ?? '-'}</p>
                                     </div>
                                     <div class="bg-slate-50 rounded-xl p-3">
-                                        <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Age</p>
-                                        <p class="text-sm font-bold text-slate-800 mt-0.5">${data.patient?.age ?? '-'} years</p>
+                                        <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Umur</p>
+                                        <p class="text-sm font-bold text-slate-800 mt-0.5">${data.patient?.age ?? '-'} tahun</p>
                                     </div>
                                     <div class="bg-slate-50 rounded-xl p-3">
                                         <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">No. RM</p>
@@ -240,21 +243,21 @@
                                         <p class="text-sm font-bold text-slate-800 mt-0.5">${data.patient?.user?.email ?? '-'}</p>
                                     </div>
                                     <div class="bg-slate-50 rounded-xl p-3">
-                                        <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Gender</p>
+                                        <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Jenis Kelamin</p>
                                         <p class="text-sm font-bold text-slate-800 mt-0.5">${gender}</p>
                                     </div>
                                     <div class="col-span-2 bg-slate-50 rounded-xl p-3">
-                                        <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Address</p>
+                                        <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Alamat</p>
                                         <p class="text-sm font-bold text-slate-800 mt-0.5">${data.patient?.address ?? '-'}</p>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="pt-5 border-t border-slate-100">
-                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3">Consultation Details</p>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3">Detail Konsultasi</p>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <div class="col-span-2 bg-slate-50 rounded-xl p-3">
-                                        <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Patient Complaint</p>
+                                        <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Keluhan Pasien</p>
                                         <p class="text-sm text-slate-700 mt-1 leading-relaxed">${data.complaint}</p>
                                     </div>
                                     <div class="bg-slate-50 rounded-xl p-3">
@@ -262,7 +265,7 @@
                                         <span class="mt-1 inline-flex px-2 py-0.5 text-xs font-bold rounded-full border ${statusClass}">${statusLabel}</span>
                                     </div>
                                     <div class="bg-slate-50 rounded-xl p-3">
-                                        <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Schedule</p>
+                                        <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Jadwal</p>
                                         <p class="text-sm font-bold text-slate-800 mt-0.5">
                                             ${data.scheduled_date ? data.scheduled_date + ' · Antrean: ' + data.queue_number : 'Belum dijadwalkan'}
                                         </p>
@@ -292,7 +295,7 @@
                             <svg class="w-12 h-12 mx-auto mb-3 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
-                            <p class="text-xs font-medium">Failed to load consultation details</p>
+                            <p class="text-xs font-medium">Gagal memuat detail konsultasi</p>
                         </div>
                     `);
                 }
@@ -309,7 +312,7 @@
         }
 
         function rejectConsultation(consultationId) {
-            if (confirm('Are you sure you want to reject this consultation?')) {
+            if (confirm('Apakah Anda yakin ingin menolak konsultasi ini?')) {
                 $.ajax({
                     url: '/doctor/consultation/' + consultationId + '/reject',
                     type: 'POST',
@@ -317,11 +320,11 @@
                         _token: $('[name="_token"]').val()
                     },
                     success: function(response) {
-                        $('#status-' + consultationId).removeClass('bg-yellow-100 text-yellow-800').addClass('bg-red-100 text-red-800').text('Cancelled');
-                        showNotification('Consultation cancelled successfully', 'success');
+                        $('#status-' + consultationId).removeClass('bg-yellow-100 text-yellow-800').addClass('bg-red-100 text-red-800').text('Dibatalkan');
+                        showNotification('Konsultasi berhasil dibatalkan', 'success');
                     },
                     error: function(xhr) {
-                        showNotification('Failed to reject consultation', 'error');
+                        showNotification('Gagal menolak konsultasi', 'error');
                     }
                 });
             }

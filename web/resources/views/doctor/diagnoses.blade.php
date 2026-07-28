@@ -16,20 +16,20 @@
 
             <!-- AVAILABLE CONSULTATIONS -->
             <div id="consultationsSection" class="bg-white shadow rounded-lg p-6">
-                <h3 class="font-bold text-lg mb-4">Available Consultations</h3>
+                <h3 class="font-bold text-lg mb-4">Konsultasi Tersedia</h3>
 
                 @if($consultations->isEmpty())
-                    <p class="text-gray-500">No scheduled consultations available for diagnosis.</p>
+                    <p class="text-gray-500">Tidak ada konsultasi terjadwal yang tersedia untuk diagnosis.</p>
                 @else
                     <div class="mb-4">
                         <form method="GET" action="{{ route('doctor.diagnoses') }}" class="flex items-center gap-3">
-                            <input id="searchConsultations" name="search" type="text" value="{{ request('search') }}" placeholder="Search patient, complaint, or date..."
+                            <input id="searchConsultations" name="search" type="text" value="{{ request('search') }}" placeholder="Cari pasien, keluhan, atau tanggal..."
                                 class="block w-full md:w-96 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-teal-500 focus:border-teal-500 text-sm" />
                             <button type="submit"
-                                class="inline-flex items-center px-4 py-2 bg-teal-600 text-white text-sm font-medium rounded-md hover:bg-teal-700 transition">Search</button>
+                                class="inline-flex items-center px-4 py-2 bg-teal-600 text-white text-sm font-medium rounded-md hover:bg-teal-700 transition">Cari</button>
                             @if(request()->has('search') && request('search') != '')
                                 <a href="{{ route('doctor.diagnoses') }}"
-                                    class="inline-flex items-center px-3 py-2 bg-gray-100 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-200 transition">Clear</a>
+                                    class="inline-flex items-center px-3 py-2 bg-gray-100 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-200 transition">Hapus</a>
                             @endif
                         </form>
                     </div>
@@ -39,7 +39,8 @@
                                 <div>
                                     <div class="flex items-center justify-between mb-3">
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                            {{ ucfirst($consultation->status) }}
+                                            @php $statusLabels = ['pending'=>'Menunggu','scheduled'=>'Dijadwalkan','cancelled'=>'Dibatalkan','done'=>'Selesai']; @endphp
+                                            {{ $statusLabels[$consultation->status] ?? ucfirst($consultation->status) }}
                                         </span>
                                         <span class="text-xs font-mono font-bold text-indigo-700 bg-indigo-50 px-2 py-1 rounded">
                                             #{{ $consultation->id }}
@@ -71,7 +72,7 @@
 
                                 <button type="button" onclick="openDiagnosisForm('{{ $consultation->id }}', '{{ addslashes($consultation->patient->name ?? 'N/A') }}')" class="w-full inline-flex justify-center items-center px-4 py-2 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white transition shadow-md shadow-teal-500/20 rounded-lg">
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
-                                    Add Diagnosis
+                                    Tambah Diagnosis
                                 </button>
                             </div>
                         @endforeach
@@ -85,7 +86,7 @@
             <!-- DIAGNOSIS FORM SECTION -->
             <div id="diagnosisFormSection" class="bg-white shadow rounded-lg p-6" style="display: none;">
                 <div class="mb-4 flex items-center justify-between">
-                    <h3 class="font-bold text-lg">Submit Diagnosis</h3>
+                    <h3 class="font-bold text-lg">Kirim Diagnosis</h3>
                     <button type="button" onclick="closeDiagnosisForm()" class="text-gray-500 hover:text-gray-700">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -97,7 +98,7 @@
                 <div id="consultationDetails" class="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Patient Name</p>
+                            <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Pasien</p>
                             <p class="mt-1 text-sm font-medium text-gray-900" id="detailPatientName">-</p>
                         </div>
                         <div>
@@ -105,11 +106,11 @@
                             <p class="mt-1 text-sm font-bold text-indigo-600" id="detailPatientRM">-</p>
                         </div>
                         <div>
-                            <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Age</p>
+                            <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Usia</p>
                             <p class="mt-1 text-sm font-medium text-gray-900" id="detailPatientAge">-</p>
                         </div>
                         <div>
-                            <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Gender</p>
+                            <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Jenis Kelamin</p>
                             <p class="mt-1 text-sm font-medium text-gray-900" id="detailPatientGender">-</p>
                         </div>
                         <div>
@@ -117,11 +118,11 @@
                             <p class="mt-1 text-sm font-medium text-gray-900" id="detailPatientEmail">-</p>
                         </div>
                         <div class="md:col-span-2">
-                            <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Complaint</p>
+                            <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Keluhan</p>
                             <p class="mt-1 text-sm text-gray-900" id="detailComplaint">-</p>
                         </div>
                         <div class="md:col-span-2">
-                            <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Scheduled</p>
+                            <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Jadwal</p>
                             <p class="mt-1 text-sm text-gray-900" id="detailScheduled">-</p>
                         </div>
                     </div>
@@ -133,8 +134,8 @@
                 <div class="mb-6" id="photoGallerySection" style="display: none;">
                     <label class="block text-sm font-medium text-gray-700 mb-3">
                         <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                        Examination Photos
-                        <span id="photoCount" class="ml-1 text-xs text-gray-400">(0 photos)</span>
+                        Foto Pemeriksaan
+                        <span id="photoCount" class="ml-1 text-xs text-gray-400">(0 foto)</span>
                     </label>
                     <div id="photoGallery" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                         <!-- Photos will be dynamically inserted here -->
@@ -144,29 +145,29 @@
                 <!-- PROCESSED VIDEO FROM EARSCOPE -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700">
-                        Ear Examination Video
+                        Video Pemeriksaan Telinga
                         <span id="pollingBadge" class="ml-2 inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-800">
                             <span class="animate-pulse w-2 h-2 rounded-full bg-yellow-500 inline-block"></span>
-                            Waiting for earscope data...
+                            Menunggu data earscope...
                         </span>
                     </label>
                     <div id="earVideoContainer" class="mt-2 p-4 border-2 border-dashed border-gray-300 rounded-lg text-center bg-gray-50 min-h-[120px] flex items-center justify-center">
-                        <p class="text-sm text-gray-400">Examination video will appear automatically after the earscope device sends data.</p>
+                        <p class="text-sm text-gray-400">Video pemeriksaan akan muncul otomatis setelah perangkat earscope mengirimkan data.</p>
                     </div>
                     <!-- RETAKE BUTTON -->
                     <div id="retakeContainer" class="mt-3 flex justify-end hidden">
                         <button type="button" onclick="retakeDiagnosis()" class="inline-flex items-center px-3 py-1.5 border border-red-300 shadow-sm text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
                             <svg class="mr-2 h-4 w-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-                            Retake Examination
+                            Ulangi Pemeriksaan
                         </button>
                     </div>
                 </div>
 
                 <!-- AI Screening Result -->
                 <div class="mt-4">
-                    <label class="block text-sm font-medium text-gray-700">AI Detection Result (Earscope)</label>
+                    <label class="block text-sm font-medium text-gray-700">Hasil Deteksi AI (Earscope)</label>
                     <div id="aiResultContainer" class="mt-2 p-4 border border-gray-300 rounded-lg bg-gray-50 min-h-[52px] flex items-center">
-                        <p class="text-sm text-gray-400 italic" id="aiResultPlaceholder">Waiting for detection result from earscope...</p>
+                        <p class="text-sm text-gray-400 italic" id="aiResultPlaceholder">Menunggu hasil deteksi dari earscope...</p>
                         <p class="text-sm font-semibold text-indigo-700 hidden" id="aiResultText"></p>
                     </div>
                 </div>
@@ -179,23 +180,23 @@
                     <div class="grid grid-cols-1 gap-6">
                         <!-- Diagnosis Result -->
                         <div>
-                            <label for="diagnosis_result" class="block text-sm font-medium text-gray-700">Diagnosis Result</label>
+                            <label for="diagnosis_result" class="block text-sm font-medium text-gray-700">Hasil Diagnosis</label>
                             <textarea id="diagnosis_result" name="diagnosis_result" rows="4" required class="mt-1 block w-full px-3 py-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border"></textarea>
                         </div>
 
                         <!-- Notes -->
                         <div>
-                            <label for="notes" class="block text-sm font-medium text-gray-700">Notes</label>
+                            <label for="notes" class="block text-sm font-medium text-gray-700">Catatan</label>
                             <textarea id="notes" name="notes" rows="3" class="mt-1 block w-full px-3 py-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border"></textarea>
                         </div>
                     </div>
 
                     <div class="mt-6 flex gap-3">
                         <button type="submit" class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white transition shadow-md shadow-teal-500/20 rounded-md">
-                            Submit Diagnosis
+                            Kirim Diagnosis
                         </button>
                         <button type="button" onclick="closeDiagnosisForm()" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-gray-800 hover:bg-gray-300">
-                            Cancel
+                            Batal
                         </button>
                     </div>
                 </form>
@@ -216,16 +217,16 @@
             <div class="flex items-center justify-center w-14 h-14 rounded-full bg-red-100 mx-auto mb-4">
                 <svg class="w-7 h-7 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
             </div>
-            <h3 class="text-xl font-bold text-center text-gray-900 mb-2">Retake Examination?</h3>
+            <h3 class="text-xl font-bold text-center text-gray-900 mb-2">Ulangi Pemeriksaan?</h3>
             <p class="text-sm text-center text-gray-500 mb-6">
-                Are you sure? This action will <strong class="text-gray-700">permanently delete</strong> the current video and AI results.
+                Apakah Anda yakin? Tindakan ini akan <strong class="text-gray-700">menghapus secara permanen</strong> video dan hasil AI saat ini.
             </p>
             <div class="flex gap-3 justify-center">
                 <button type="button" onclick="closeRetakeModal()" class="w-1/2 px-4 py-2.5 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition">
-                    Cancel
+                    Batal
                 </button>
                 <button type="button" onclick="executeRetake()" id="confirmRetakeBtn" class="w-1/2 px-4 py-2.5 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 transition flex items-center justify-center">
-                    Yes, Delete
+                    Ya, Hapus
                 </button>
             </div>
         </div>
@@ -313,7 +314,7 @@
             $('#pollingBadge')
                 .removeClass('bg-yellow-100 text-yellow-800')
                 .addClass('bg-green-100 text-green-800')
-                .html('<span class="w-2 h-2 rounded-full bg-green-500 inline-block"></span> Data received from earscope');
+                .html('<span class="w-2 h-2 rounded-full bg-green-500 inline-block"></span> Data diterima dari earscope');
 
             // Show retake button
             $('#retakeContainer').removeClass('hidden');
@@ -328,7 +329,7 @@
                 );
             } else {
                 $('#earVideoContainer').html(
-                    '<p class="text-sm text-gray-400">Earscope video not available.</p>'
+                    '<p class="text-sm text-gray-400">Video earscope tidak tersedia.</p>'
                 );
             }
         }
@@ -341,7 +342,7 @@
             if (photos.length === 0) return;
 
             section.style.display = 'block';
-            countEl.textContent = '(' + photos.length + ' photos)';
+            countEl.textContent = '(' + photos.length + ' foto)';
             $('#retakeContainer').removeClass('hidden');
 
             // Only add new photos
@@ -349,7 +350,7 @@
                 if (knownPhotoIds.has(photo.id)) return;
                 knownPhotoIds.add(photo.id);
 
-                const typeLabel = photo.ai_screening_result?.type === 'bbox' ? 'AI Detection' : 'Raw';
+                const typeLabel = photo.ai_screening_result?.type === 'bbox' ? 'Deteksi AI' : 'Asli';
                 const typeBg = photo.ai_screening_result?.type === 'bbox' ? 'bg-cyan-100 text-cyan-700' : 'bg-gray-100 text-gray-600';
 
                 const card = document.createElement('div');
@@ -404,8 +405,8 @@
             $('#pollingBadge')
                 .removeClass('bg-green-100 text-green-800')
                 .addClass('bg-yellow-100 text-yellow-800')
-                .html('<span class="animate-pulse w-2 h-2 rounded-full bg-yellow-500 inline-block"></span> Waiting for earscope data...');
-            $('#earVideoContainer').html('<p class="text-sm text-gray-400">Examination video will appear automatically after the earscope device sends data.</p>');
+                .html('<span class="animate-pulse w-2 h-2 rounded-full bg-yellow-500 inline-block"></span> Menunggu data earscope...');
+            $('#earVideoContainer').html('<p class="text-sm text-gray-400">Video pemeriksaan akan muncul otomatis setelah perangkat earscope mengirimkan data.</p>');
             $('#aiResultPlaceholder').removeClass('hidden');
             $('#aiResultText').addClass('hidden').text('');
             $('#retakeContainer').addClass('hidden');
@@ -432,7 +433,7 @@
                     }
                 },
                 error: function () {
-                    alert('Failed to load consultation details');
+                    alert('Gagal memuat detail konsultasi');
                     closeDiagnosisForm();
                 }
             });
@@ -474,7 +475,7 @@
         function executeRetake() {
             const btn = $('#confirmRetakeBtn');
             const originalText = btn.html();
-            btn.prop('disabled', true).html('<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Deleting...');
+            btn.prop('disabled', true).html('<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Menghapus...');
 
             $.ajax({
                 url: '/doctor/consultation/' + currentConsultationId + '/retake',
@@ -489,8 +490,8 @@
                     $('#pollingBadge')
                         .removeClass('bg-green-100 text-green-800')
                         .addClass('bg-yellow-100 text-yellow-800')
-                        .html('<span class="animate-pulse w-2 h-2 rounded-full bg-yellow-500 inline-block"></span> Waiting for earscope data...');
-                    $('#earVideoContainer').html('<p class="text-sm text-gray-400">Examination video will appear automatically after the earscope device sends data.</p>');
+                        .html('<span class="animate-pulse w-2 h-2 rounded-full bg-yellow-500 inline-block"></span> Menunggu data earscope...');
+                    $('#earVideoContainer').html('<p class="text-sm text-gray-400">Video pemeriksaan akan muncul otomatis setelah perangkat earscope mengirimkan data.</p>');
                     $('#aiResultPlaceholder').removeClass('hidden');
                     $('#aiResultText').addClass('hidden').text('');
                     $('#diagnosis_result').val('');
@@ -500,12 +501,12 @@
                     $('#photoGallery').html('');
                     $('#photoGallerySection').hide();
                     
-                    showToast('Data reset successfully. You can now retake.');
+                    showToast('Data berhasil diatur ulang. Anda sekarang dapat mengulangi.');
                 },
                 error: function(xhr) {
                     btn.prop('disabled', false).html(originalText);
                     closeRetakeModal();
-                    alert('Failed to delete old diagnosis: ' + (xhr.responseJSON?.error || 'Unknown error'));
+                    alert('Gagal menghapus diagnosis lama: ' + (xhr.responseJSON?.error || 'Unknown error'));
                 }
             });
         }

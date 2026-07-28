@@ -10,7 +10,7 @@
                 <h2 class="font-bold text-2xl text-slate-800 leading-tight">
                     {{ __('Doctor Dashboard') }}
                 </h2>
-                <p class="text-xs font-medium text-slate-400 mt-0.5">Summary of patient diagnosis activity and your clinical consultations</p>
+                <p class="text-xs font-medium text-slate-400 mt-0.5">Ringkasan aktivitas diagnosis pasien dan konsultasi klinis Anda</p>
             </div>
         </div>
     </x-slot>
@@ -24,7 +24,7 @@
                 <!-- Stats 1 -->
                 <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between group hover:-translate-y-1 hover:shadow-md transition-all duration-300">
                     <div>
-                        <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Pending Consultations</h3>
+                        <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Konsultasi Menunggu</h3>
                         <p class="text-3xl font-extrabold text-slate-800 mt-2">{{ $pendingCount }}</p>
                     </div>
                     <div class="p-4 bg-amber-50 rounded-2xl text-amber-500 group-hover:bg-amber-100/70 transition-colors">
@@ -37,7 +37,7 @@
                 <!-- Stats 2 -->
                 <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between group hover:-translate-y-1 hover:shadow-md transition-all duration-300">
                     <div>
-                        <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Today's Schedule</h3>
+                        <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Jadwal Hari Ini</h3>
                         <p class="text-3xl font-extrabold text-slate-800 mt-2">{{ $todayScheduleCount }}</p>
                     </div>
                     <div class="p-4 bg-teal-50 rounded-2xl text-teal-600 group-hover:bg-teal-100/70 transition-colors">
@@ -50,7 +50,7 @@
                 <!-- Stats 3 -->
                 <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between group hover:-translate-y-1 hover:shadow-md transition-all duration-300">
                     <div>
-                        <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Patients Handled</h3>
+                        <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Pasien Ditangani</h3>
                         <p class="text-3xl font-extrabold text-slate-800 mt-2">{{ $patientsHandledCount }}</p>
                     </div>
                     <div class="p-4 bg-emerald-50 rounded-2xl text-emerald-600 group-hover:bg-emerald-100/70 transition-colors">
@@ -65,37 +65,37 @@
             <!-- UPCOMING CONSULTATIONS -->
             <div class="bg-white shadow rounded-lg p-6 overflow-x-auto">
                 <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
-                    <h3 class="font-bold text-lg">Upcoming Consultation</h3>
+                    <h3 class="font-bold text-lg">Konsultasi Akan Datang</h3>
                     <div class="flex flex-wrap gap-2">
                         <a href="{{ route('doctor.dashboard', ['filter' => 'all']) }}"
                            class="px-4 py-2 rounded-md text-sm font-medium {{ $filter === 'all' ? 'bg-indigo-100 text-indigo-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
-                            All
+                            Semua
                         </a>
                         <a href="{{ route('doctor.dashboard', ['filter' => 'today']) }}"
                            class="px-4 py-2 rounded-md text-sm font-medium {{ $filter === 'today' ? 'bg-indigo-100 text-indigo-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
-                            Today
+                            Hari Ini
                         </a>
                         <a href="{{ route('doctor.dashboard', ['filter' => 'week']) }}"
                            class="px-4 py-2 rounded-md text-sm font-medium {{ $filter === 'week' ? 'bg-indigo-100 text-indigo-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
-                            This Week
+                            Minggu Ini
                         </a>
                         <a href="{{ route('doctor.dashboard', ['filter' => 'month']) }}"
                            class="px-4 py-2 rounded-md text-sm font-medium {{ $filter === 'month' ? 'bg-indigo-100 text-indigo-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
-                            This Month
+                            Bulan Ini
                         </a>
                     </div>
                 </div>
 
                 @if($consultations->isEmpty())
-                    <p class="text-gray-500">No scheduled consultations found for the selected period.</p>
+                    <p class="text-gray-500">Tidak ada konsultasi terjadwal untuk periode yang dipilih.</p>
                 @else
                     <div class="overflow-x-auto rounded-lg shadow">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr class="text-left text-xs text-gray-500 uppercase">
-                                    <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient</th>
-                                    <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Complaint</th>
-                                    <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Scheduled Date</th>
+                                    <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pasien</th>
+                                    <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Keluhan</th>
+                                    <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Jadwal</th>
                                     <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Antrean</th>
                                     <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                                 </tr>
@@ -119,10 +119,10 @@
                                         <td class="px-6 py-4">
                                             @php
                                                 $statusMap = [
-                                                    'pending'   => ['label' => 'Pending',   'class' => 'bg-amber-50 text-amber-700 border-amber-200/50'],
-                                                    'scheduled' => ['label' => 'Scheduled','class' => 'bg-emerald-50 text-emerald-700 border-emerald-200/50'],
-                                                    'cancelled' => ['label' => 'Cancelled', 'class' => 'bg-rose-50 text-rose-700 border-rose-200/50'],
-                                                    'done'      => ['label' => 'Done',    'class' => 'bg-sky-50 text-sky-700 border-sky-200/50'],
+                                                    'pending'   => ['label' => 'Menunggu',   'class' => 'bg-amber-50 text-amber-700 border-amber-200/50'],
+                                                    'scheduled' => ['label' => 'Dijadwalkan','class' => 'bg-emerald-50 text-emerald-700 border-emerald-200/50'],
+                                                    'cancelled' => ['label' => 'Dibatalkan', 'class' => 'bg-rose-50 text-rose-700 border-rose-200/50'],
+                                                    'done'      => ['label' => 'Selesai',    'class' => 'bg-sky-50 text-sky-700 border-sky-200/50'],
                                                 ];
                                                 $s = $statusMap[$consultation->status] ?? ['label' => ucfirst($consultation->status), 'class' => 'bg-slate-50 text-slate-700 border-slate-200/50'];
                                             @endphp
@@ -142,21 +142,21 @@
             <!-- WAITING FOR APPROVAL -->
             <div class="bg-white shadow rounded-lg p-6 overflow-x-auto">
                 <div class="flex items-center justify-between mb-6">
-                    <h3 class="font-bold text-lg">Waiting for Approval</h3>
-                    <span class="text-sm text-gray-500">{{ $pendingRequests->count() }} request(s)</span>
+                    <h3 class="font-bold text-lg">Menunggu Persetujuan</h3>
+                    <span class="text-sm text-gray-500">{{ $pendingRequests->count() }} permintaan</span>
                 </div>
 
                 @if($pendingRequests->isEmpty())
-                    <p class="text-gray-500">No pending consultation requests at the moment.</p>
+                    <p class="text-gray-500">Tidak ada permintaan konsultasi yang menunggu saat ini.</p>
                 @else
                     <div class="overflow-x-auto rounded-lg shadow">
                         <table class="min-w-full divide-y divide-gray-200 overflow-y-auto">
                             <thead class="bg-gray-50">
                                 <tr class="text-left text-xs text-gray-500 uppercase">
-                                    <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient</th>
+                                    <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pasien</th>
                                     <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                                    <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Complaint</th>
-                                    <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Requested At</th>
+                                    <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Keluhan</th>
+                                    <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal Diminta</th>
                                     <th scope="col" class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                                 </tr>
                             </thead>
@@ -177,7 +177,7 @@
                                         </td>
                                         <td class="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
                                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                                {{ ucfirst($request->status) }}
+                                                Menunggu
                                             </span>
                                         </td>
                                     </tr>

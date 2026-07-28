@@ -10,9 +10,9 @@
                 <div class="flex items-center justify-between mb-4">
                     <div>
                         <h3 class="text-lg leading-6 font-medium text-gray-900" id="scheduleModalTitle">
-                            Approve &amp; Schedule Consultation
+                            Setujui &amp; Jadwalkan Konsultasi
                         </h3>
-                        <p class="text-sm text-gray-500 mt-0.5" id="scheduleModalSubtitle">Set the consultation schedule for this patient</p>
+                        <p class="text-sm text-gray-500 mt-0.5" id="scheduleModalSubtitle">Atur jadwal konsultasi untuk pasien ini</p>
                     </div>
                     <button type="button" onclick="closeScheduleModal()" class="text-gray-400 hover:text-gray-500 ml-4">
                         <span class="sr-only">Close</span>
@@ -27,9 +27,9 @@
                     <input type="hidden" id="consultationId" name="consultation_id">
 
                     <div>
-                        <label for="scheduledDate" class="block text-sm font-medium text-gray-700">Scheduled Date</label>
+                        <label for="scheduledDate" class="block text-sm font-medium text-gray-700">Tanggal Jadwal</label>
                         <input type="date" id="scheduledDate" name="scheduled_date" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                        <small class="text-gray-500">Today or later</small>
+                        <small class="text-gray-500">Hari ini atau nanti</small>
                     </div>
 
                     <div id="scheduleError" class="hidden">
@@ -49,10 +49,10 @@
             <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-2">
                 <button type="button" id="scheduleSubmitBtn" onclick="submitSchedule()" class="w-full inline-flex justify-center items-center gap-2 rounded-md border border-transparent px-4 py-2 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white transition shadow-md shadow-teal-500/20 sm:ml-3 sm:w-auto sm:text-sm">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                    <span id="scheduleSubmitLabel">Approve &amp; Schedule</span>
+                    <span id="scheduleSubmitLabel">Setujui &amp; Jadwalkan</span>
                 </button>
                 <button type="button" onclick="closeScheduleModal()" class="w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm">
-                    Cancel
+                    Batal
                 </button>
             </div>
         </div>
@@ -69,11 +69,11 @@
 
         // Adjust title & button based on context
         if (isApprove) {
-            $('#scheduleModalTitle').text('Approve & Schedule Consultation');
-            $('#scheduleSubmitLabel').text('Approve & Schedule');
+            $('#scheduleModalTitle').text('Setujui & Jadwalkan Konsultasi');
+            $('#scheduleSubmitLabel').text('Setujui & Jadwalkan');
         } else {
-            $('#scheduleModalTitle').text('Reschedule Consultation');
-            $('#scheduleSubmitLabel').text('Save Schedule');
+            $('#scheduleModalTitle').text('Jadwalkan Ulang Konsultasi');
+            $('#scheduleSubmitLabel').text('Simpan Jadwal');
             $('#scheduleSubmitBtn').removeClass('bg-green-600 hover:bg-green-700').addClass('bg-indigo-600 hover:bg-indigo-700');
         }
 
@@ -92,12 +92,12 @@
         let scheduledDate = $('#scheduledDate').val();
 
         if (!scheduledDate) {
-            showScheduleError('Please fill in all fields');
+            showScheduleError('Harap isi semua bidang');
             return;
         }
 
         $('#scheduleSubmitBtn').prop('disabled', true);
-        $('#scheduleSubmitLabel').text('Saving...');
+        $('#scheduleSubmitLabel').text('Menyimpan...');
 
         $.ajax({
             url: '/doctor/consultation/' + consultationId + '/schedule',
@@ -107,7 +107,7 @@
                 scheduled_date: scheduledDate
             },
             success: function(response) {
-                showScheduleSuccess('Consultation scheduled successfully!');
+                showScheduleSuccess('Konsultasi berhasil dijadwalkan!');
 
                 setTimeout(function() {
                     closeScheduleModal();
@@ -115,7 +115,7 @@
                 }, 1500);
             },
             error: function(xhr) {
-                let errorMessage = 'An error occurred';
+                let errorMessage = 'Terjadi kesalahan';
                 if (xhr.responseJSON && xhr.responseJSON.error) {
                     errorMessage = xhr.responseJSON.error;
                 } else if (xhr.responseJSON && xhr.responseJSON.errors) {
@@ -123,7 +123,7 @@
                 }
                 showScheduleError(errorMessage);
                 $('#scheduleSubmitBtn').prop('disabled', false);
-                $('#scheduleSubmitLabel').text('Approve & Schedule');
+                $('#scheduleSubmitLabel').text('Setujui & Jadwalkan');
             }
         });
     }

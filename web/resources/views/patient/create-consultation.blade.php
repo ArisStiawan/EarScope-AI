@@ -10,7 +10,7 @@
                 <h2 class="font-bold text-2xl text-slate-800 leading-tight">
                     {{ __('Request Consultation') }}
                 </h2>
-                <p class="text-xs font-medium text-slate-400 mt-0.5">Submit an ear health diagnosis request to a specialist doctor</p>
+                <p class="text-xs font-medium text-slate-400 mt-0.5">Kirim permintaan diagnosis kesehatan telinga ke dokter spesialis</p>
             </div>
         </div>
     </x-slot>
@@ -43,8 +43,8 @@
                                 </svg>
                             </div>
                             <div>
-                                <h3 class="text-lg font-bold text-slate-800">Ear Diagnosis Form</h3>
-                                <p class="text-xs text-slate-400 font-medium">Complete the details below for a remote consultation</p>
+                                <h3 class="text-lg font-bold text-slate-800">Formulir Diagnosis Telinga</h3>
+                                <p class="text-xs text-slate-400 font-medium">Lengkapi detail di bawah ini untuk konsultasi jarak jauh</p>
                             </div>
                         </div>
                     </div>
@@ -56,7 +56,7 @@
                         {{-- Pilih Dokter --}}
                         <div>
                             <label for="doctor_id" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
-                                Select Doctor <span class="text-rose-500">*</span>
+                                Pilih Dokter <span class="text-rose-500">*</span>
                             </label>
                             <div class="relative">
                                 <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
@@ -69,7 +69,7 @@
                                            focus:outline-none focus:bg-white focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20
                                            appearance-none cursor-pointer transition-all duration-200
                                            @error('doctor_id') border-rose-300 @enderror">
-                                    <option value="" disabled selected>-- Select Doctor --</option>
+                                    <option value="" disabled selected>-- Pilih Dokter --</option>
                                     @foreach($doctors as $doctor)
                                         <option value="{{ $doctor->id }}"
                                             {{ old('doctor_id') == $doctor->id ? 'selected' : '' }}>
@@ -100,10 +100,10 @@
                         {{-- Keluhan --}}
                         <div>
                             <label for="complaint" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
-                                Symptom Complaint <span class="text-rose-500">*</span>
+                                Keluhan Gejala <span class="text-rose-500">*</span>
                             </label>
                             <textarea id="complaint" name="complaint" rows="6"
-                                placeholder="Describe in detail the complaint or symptoms you are experiencing in the ear area (e.g.: throbbing pain, blocked, or fluid discharge)..."
+                                placeholder="Jelaskan secara detail keluhan atau gejala yang Anda alami di area telinga (misalnya: nyeri berdenyut, tersumbat, atau keluar cairan)..."
                                 class="w-full border border-slate-200 rounded-xl px-4 py-3 text-slate-800 text-sm font-medium bg-slate-50/50
                                        focus:outline-none focus:bg-white focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20
                                        resize-none transition-all duration-200 @error('complaint') border-rose-300 @enderror">{{ old('complaint') }}</textarea>
@@ -113,7 +113,7 @@
                                     {{ $message }}
                                 </p>
                             @enderror
-                            <p class="mt-2 text-xs text-slate-400 font-medium">Tip: Complete symptom information helps the doctor provide a more accurate initial analysis.</p>
+                            <p class="mt-2 text-xs text-slate-400 font-medium">Tip: Informasi gejala yang lengkap membantu dokter memberikan analisis awal yang lebih akurat.</p>
                         </div>
 
                         {{-- Action Buttons --}}
@@ -124,7 +124,7 @@
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                                 </svg>
-                                Cancel
+                                Batal
                             </a>
                             <button type="submit"
                                 class="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700
@@ -133,7 +133,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                                 </svg>
-                                Submit Consultation
+                                Kirim Konsultasi
                             </button>
                         </div>
                     </form>

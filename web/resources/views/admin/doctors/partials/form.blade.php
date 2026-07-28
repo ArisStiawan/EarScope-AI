@@ -7,7 +7,7 @@
 
     <!-- Username (Read-only for edit) -->
     <div>
-        <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+        <label for="username" class="block text-sm font-medium text-gray-700">Nama Pengguna</label>
         @if($edit)
             <input type="text" id="username" value="{{ $doctor->user->username }}" disabled class="mt-1 block w-full rounded-md bg-gray-100 border-gray-300 shadow-sm py-2 px-3 text-gray-600" />
         @else
@@ -20,7 +20,7 @@
 
     <!-- Email -->
     <div>
-        <label for="email" class="block text-sm font-medium text-gray-700">Email Address</label>
+        <label for="email" class="block text-sm font-medium text-gray-700">Alamat Email</label>
         <input type="email" id="email" name="email" value="{{ old('email', $doctor->user->email ?? '') }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 border focus:border-blue-500 focus:ring-blue-500" />
         @error('email')
             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -30,7 +30,7 @@
     <!-- Password (Only for create) -->
     @unless($edit)
         <div>
-            <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+            <label for="password" class="block text-sm font-medium text-gray-700">Kata Sandi</label>
             <input type="password" id="password" name="password" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 border focus:border-blue-500 focus:ring-blue-500" />
             @error('password')
                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -40,7 +40,7 @@
 
     <!-- Doctor Name -->
     <div>
-        <label for="name" class="block text-sm font-medium text-gray-700">Doctor Name</label>
+        <label for="name" class="block text-sm font-medium text-gray-700">Nama Dokter</label>
         <input type="text" id="name" name="name" value="{{ old('name', $doctor->name ?? '') }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 border focus:border-blue-500 focus:ring-blue-500" />
         @error('name')
             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -49,7 +49,7 @@
 
     <!-- License Number -->
     <div>
-        <label for="license_number" class="block text-sm font-medium text-gray-700">License Number (STR)</label>
+        <label for="license_number" class="block text-sm font-medium text-gray-700">Nomor Lisensi (STR)</label>
         <input type="text" id="license_number" name="license_number" value="{{ old('license_number', $doctor->license_number ?? '') }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm py-2 px-3 border focus:border-blue-500 focus:ring-blue-500" />
         @error('license_number')
             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -94,15 +94,15 @@
 
     <!-- Gender -->
     <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">Gender</label>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Jenis Kelamin</label>
         <div class="space-y-2">
             <div class="flex items-center">
                 <input type="radio" id="gender_male" name="gender" value="male" @checked(old('gender', $doctor->gender ?? '') === 'male') required class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300" />
-                <label for="gender_male" class="ml-2 block text-sm text-gray-700">Male</label>
+                <label for="gender_male" class="ml-2 block text-sm text-gray-700">Laki-laki</label>
             </div>
             <div class="flex items-center">
                 <input type="radio" id="gender_female" name="gender" value="female" @checked(old('gender', $doctor->gender ?? '') === 'female') required class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300" />
-                <label for="gender_female" class="ml-2 block text-sm text-gray-700">Female</label>
+                <label for="gender_female" class="ml-2 block text-sm text-gray-700">Perempuan</label>
             </div>
         </div>
         @error('gender')
@@ -113,10 +113,10 @@
     <!-- Buttons -->
     <div class="flex gap-3 pt-6">
         <button type="submit" class="px-4 py-2 bg-gradient-to-r from-teal-600 to-emerald-600 text-white rounded-md transition hover:from-teal-700 hover:to-emerald-700">
-            {{ $submit_label ?? 'Save' }}
+            {{ $submit_label ?? 'Simpan' }}
         </button>
         <a href="{{ route('admin.doctors.index') }}" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition">
-            Cancel
+            Batal
         </a>
     </div>
 </form>

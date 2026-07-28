@@ -38,7 +38,7 @@
                         </div>
                         <div>
                             <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Jenis Kelamin</p>
-                            <p class="text-sm font-semibold text-slate-700 mt-0.5 capitalize">{{ $patient->gender ?? '-' }}</p>
+                            <p class="text-sm font-semibold text-slate-700 mt-0.5 capitalize">{{ $patient->gender === 'male' ? 'Laki-laki' : ($patient->gender === 'female' ? 'Perempuan' : ($patient->gender ?? '-')) }}</p>
                         </div>
                         <div>
                             <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Umur</p>
